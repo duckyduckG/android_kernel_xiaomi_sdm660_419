@@ -815,8 +815,8 @@ static int spss_parse_dt(struct device_node *node)
 	ret = of_property_read_u32(node, "qcom,spss-emul-type-reg-addr",
 			     &spss_emul_type_reg_addr);
 	if (ret < 0) {
-		pr_err("can't get spss-emulation-type-reg addr\n");
-		return -EINVAL;
+		pr_warn("can't get spss-emulation-type-reg addr\n");
+		goto end;
 	}
 
 	spss_emul_type_reg = ioremap_nocache(spss_emul_type_reg_addr,
@@ -835,6 +835,7 @@ static int spss_parse_dt(struct device_node *node)
 		firmware_type = SPSS_FW_TYPE_NONE;
 	}
 	iounmap(spss_emul_type_reg);
+end:
 
 	if (!is_cmac_and_iar_feature_supported) {
 		pr_info("legacy SPSS not support cmac & iar feature.\n");

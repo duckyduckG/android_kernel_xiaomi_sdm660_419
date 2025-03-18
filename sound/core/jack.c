@@ -33,17 +33,13 @@ struct snd_jack_kctl {
 };
 
 #ifdef CONFIG_SND_JACK_INPUT_DEV
-static int jack_switch_types[] = {
+static int jack_switch_types[SND_JACK_SWITCH_TYPES] = {
 	SW_HEADPHONE_INSERT,
 	SW_MICROPHONE_INSERT,
 	SW_LINEOUT_INSERT,
 	SW_JACK_PHYSICAL_INSERT,
 	SW_VIDEOOUT_INSERT,
 	SW_LINEIN_INSERT,
-	SW_HPHL_OVERCURRENT,
-	SW_HPHR_OVERCURRENT,
-	SW_UNSUPPORT_INSERT,
-	SW_MICROPHONE2_INSERT,
 };
 #endif /* CONFIG_SND_JACK_INPUT_DEV */
 
@@ -261,7 +257,7 @@ int snd_jack_new(struct snd_card *card, const char *id, int type,
 
 		jack->type = type;
 
-		for (i = 0; i < ARRAY_SIZE(jack_switch_types); i++)
+		for (i = 0; i < SND_JACK_SWITCH_TYPES; i++)
 			if (type & (1 << i))
 				input_set_capability(jack->input_dev, EV_SW,
 						     jack_switch_types[i]);
@@ -366,7 +362,6 @@ void snd_jack_report(struct snd_jack *jack, int status)
 {
 	struct snd_jack_kctl *jack_kctl;
 #ifdef CONFIG_SND_JACK_INPUT_DEV
-	struct input_dev *idev;
 	int i;
 #endif
 
@@ -385,14 +380,14 @@ void snd_jack_report(struct snd_jack *jack, int status)
 		int testbit = SND_JACK_BTN_0 >> i;
 
 		if (jack->type & testbit)
-			input_report_key(idev, jack->key[i],
+			input_report_key(jack->input_dev, jack->key[i],
 					 status & testbit);
 	}
 
 	for (i = 0; i < ARRAY_SIZE(jack_switch_types); i++) {
 		int testbit = 1 << i;
 		if (jack->type & testbit)
-			input_report_switch(idev,
+			input_report_switch(jack->input_dev,
 					    jack_switch_types[i],
 					    status & testbit);
 	}

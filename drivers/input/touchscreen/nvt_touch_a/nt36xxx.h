@@ -32,7 +32,7 @@
 
 #define INT_TRIGGER_TYPE IRQ_TYPE_EDGE_RISING
 
-#define NVT_I2C_NAME "NVT-ts"
+#define NVT_I2C_NAME "NVT-ts_a"
 #define I2C_BLDR_Address 0x01
 #define I2C_FW_Address 0x01
 #define I2C_HW_Address 0x62
@@ -44,7 +44,7 @@
 #endif
 #define NVT_ERR(fmt, args...)    pr_err("[%s] %s %d: " fmt, NVT_I2C_NAME, __func__, __LINE__, ##args)
 
-#define NVT_TS_NAME "NVTCapacitiveTouchScreen"
+#define NVT_ts_a_NAME "NVTCapacitiveTouchScreen"
 
 #define TOUCH_DEFAULT_MAX_WIDTH 1080
 #define TOUCH_DEFAULT_MAX_HEIGHT 2280
@@ -61,7 +61,7 @@ extern const uint16_t touch_key_array[TOUCH_KEY_NUM];
 #define MT_PROTOCOL_B 1
 #define WAKEUP_GESTURE 1
 #if WAKEUP_GESTURE
-extern const uint16_t gesture_key_array[];
+extern const uint16_t gesture_key_array_a[];
 #endif
 #define BOOT_UPDATE_FIRMWARE 0
 /* add by yangjiangzhu compatible to shenchao and tianma TP FW  2018/3/16  start */
@@ -73,7 +73,7 @@ extern const uint16_t gesture_key_array[];
 #define NVT_TOUCH_ESD_PROTECT 1
 #define NVT_TOUCH_ESD_CHECK_PERIOD 1500	/* ms */
 
-struct nvt_ts_data {
+struct nvt_ts_a_data {
 	struct i2c_client *client;
 	struct input_dev *input_dev;
 	struct work_struct nvt_work;
@@ -97,7 +97,7 @@ struct nvt_ts_data {
 	int32_t reset_gpio;
 	uint32_t reset_flags;
 	struct mutex lock;
-	const struct nvt_ts_mem_map *mmap;
+	const struct nvt_ts_a_mem_map *mmap;
 	uint8_t carrier_system;
 	uint16_t nvt_pid;
 	struct wakeup_source *gesture_wakeup;
@@ -126,16 +126,16 @@ typedef enum {
 	EVENT_MAP_PROJECTID                     = 0x9A,
 } I2C_EVENT_MAP;
 
-extern struct nvt_ts_data *ts;
+extern struct nvt_ts_a_data *ts_a;
 
-extern int32_t CTP_I2C_READ(struct i2c_client *client, uint16_t address, uint8_t *buf, uint16_t len);
-extern int32_t CTP_I2C_WRITE(struct i2c_client *client, uint16_t address, uint8_t *buf, uint16_t len);
-extern int nvt_bootloader_reset(void);
-extern void nvt_sw_reset_idle(void);
-extern int32_t nvt_check_fw_reset_state(RST_COMPLETE_STATE check_reset_state);
-extern int32_t nvt_get_fw_info(void);
-extern int32_t nvt_clear_fw_status(void);
-extern int32_t nvt_check_fw_status(void);
+extern int32_t CTP_I2C_READ_A(struct i2c_client *client, uint16_t address, uint8_t *buf, uint16_t len);
+extern int32_t CTP_I2C_WRITE_A(struct i2c_client *client, uint16_t address, uint8_t *buf, uint16_t len);
+extern int nvt_bootloader_reset_a(void);
+extern void nvt_sw_reset_idle_a(void);
+extern int32_t nvt_check_fw_reset_state_a(RST_COMPLETE_STATE check_reset_state);
+extern int32_t nvt_get_fw_info_a(void);
+extern int32_t nvt_clear_fw_status_a(void);
+extern int32_t nvt_check_fw_status_a(void);
 #if NVT_TOUCH_ESD_PROTECT
 extern void nvt_esd_check_enable(uint8_t enable);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */

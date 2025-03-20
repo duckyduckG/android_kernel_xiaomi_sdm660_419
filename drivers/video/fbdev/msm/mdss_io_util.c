@@ -7,16 +7,29 @@
 #include <linux/delay.h>
 #include <linux/mdss_io_util.h>
 
+#ifdef CONFIG_MACH_XIAOMI_SDM660
+#if defined(CONFIG_MACH_XIAOMI_WHYRED) || defined(CONFIG_MACH_XIAOMI_LAVENDER) || defined(CONFIG_MACH_XIAOMI_TULIP) || defined(CONFIG_MACH_XIAOMI_WAYNE)
+#define XIAOMI_WAKE_GESTURE_SUPPORTED 1
+#else
+#define XIAOMI_WAKE_GESTURE_SUPPORTED 0
+#endif
+#endif
+
+#if XIAOMI_WAKE_GESTURE_SUPPORTED
 #ifdef CONFIG_MACH_LONGCHEER
 extern bool enable_gesture_mode;
 #endif
 
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 extern bool synaptics_gesture_enable_flag;
-//#elif defined CONFIG_MACH_XIAOMI_TULIP
+#endif
+//#ifdef CONFIG_MACH_XIAOMI_TULIP
 //extern bool focal_gesture_mode;
-#elif defined CONFIG_MACH_XIAOMI_WHYRED
+//#endif
+#if defined(CONFIG_MACH_XIAOMI_WHYRED) || defined(CONFIG_MACH_XIAOMI_TULIP)
+extern bool focal_gesture_mode;
 extern bool synaptics_gesture_func_on;
+#endif
 #endif
 
 #define MAX_I2C_CMDS  16
@@ -277,13 +290,15 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 			/* vddio lab ibb continus supply */
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 			if(enable_gesture_mode || synaptics_gesture_enable_flag) {
-#elif defined CONFIG_MACH_XIAOMI_TULIP
+/*#elif defined CONFIG_MACH_XIAOMI_TULIP
 			//if(enable_gesture_mode || focal_gesture_mode) {
 			if(enable_gesture_mode) {
 #elif defined CONFIG_MACH_XIAOMI_WAYNE
 			if(enable_gesture_mode) {
 #elif defined CONFIG_MACH_XIAOMI_WHYRED
-			if(enable_gesture_mode || synaptics_gesture_func_on) {
+				if(enable_gesture_mode || synaptics_gesture_func_on) {*/
+#elif defined XIAOMI_WAKE_GESTURE_SUPPORTED
+			if(enable_gesture_mode || focal_gesture_mode || synaptics_gesture_func_on) {
 #endif
 				if( (strcmp(in_vreg[i].vreg_name,"lab")==0) ||
 						(strcmp(in_vreg[i].vreg_name,"ibb")==0) ||
@@ -336,13 +351,15 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 			/* vddio lab ibb continus supply */
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 			if (enable_gesture_mode || synaptics_gesture_enable_flag) {
-#elif defined CONFIG_MACH_XIAOMI_TULIP
+/*#elif defined CONFIG_MACH_XIAOMI_TULIP
 			//if (enable_gesture_mode || focal_gesture_mode) {
 			if (enable_gesture_mode) {
 #elif defined CONFIG_MACH_XIAOMI_WAYNE
 			if(enable_gesture_mode) {
 #elif defined CONFIG_MACH_XIAOMI_WHYRED
-			if (enable_gesture_mode || synaptics_gesture_func_on) {
+				if(enable_gesture_mode || synaptics_gesture_func_on) {*/
+#elif defined XIAOMI_WAKE_GESTURE_SUPPORTED
+			if (enable_gesture_mode || focal_gesture_mode || synaptics_gesture_func_on) {
 #endif
 				if( (strcmp(in_vreg[i].vreg_name,"lab")==0) ||
 						(strcmp(in_vreg[i].vreg_name,"ibb")==0) ||

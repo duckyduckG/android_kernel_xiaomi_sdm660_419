@@ -788,3 +788,8 @@ CONFIG_MTD=y
 CONFIG_MTD_BLOCK=y
 CONFIG_MTD_OOPS=y
 CONFIG_MTD_BLOCK2MTD=y
+
+#
+# Memory Management options
+#
+CONFIG_KSM=y

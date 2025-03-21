@@ -9,6 +9,7 @@
 		qcom,affinity = <0>;
 		reg = <0x179ce800 0x1000>,
 			<0x179c1400 0x1000>;
+		qcom,plat-mitigation-disable;
 		qcom,legacy-lmh-enable;
 		qcom,no-cooling-device-register;
 	};
@@ -19,6 +20,7 @@
 		qcom,affinity = <1>;
 		reg = <0x179cc800 0x1000>,
 			<0x179c3400 0x1000>;
+		qcom,plat-mitigation-disable;
 		qcom,legacy-lmh-enable;
 		qcom,no-cooling-device-register;
 	};

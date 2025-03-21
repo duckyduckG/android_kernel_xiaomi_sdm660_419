@@ -58,7 +58,7 @@ int32_t update_firmware_request(char *filename)
 
 	NVT_LOG("filename is %s\n", filename);
 
-	ret = request_firmware(&fw_entry, filename, &ts_a->client->dev);
+	ret = request_firmware(&fw_entry, filename, &ts->client->dev);
 	if (ret) {
 		NVT_ERR("firmware load failed, ret=%d\n", ret);
 		return ret;
@@ -110,9 +110,9 @@ int32_t Check_FW_Ver(void)
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-	buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+	buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+	buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+	ret = CTP_I2C_WRITE(ts->client, I2C_BLDR_Address, buf, 3);
 	if (ret < 0) {
 		NVT_ERR("i2c write error!(%d)\n", ret);
 		return ret;
@@ -122,7 +122,7 @@ int32_t Check_FW_Ver(void)
 	buf[0] = EVENT_MAP_FWINFO;
 	buf[1] = 0x00;
 	buf[2] = 0x00;
-	ret = CTP_I2C_READ_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+	ret = CTP_I2C_READ(ts->client, I2C_BLDR_Address, buf, 3);
 	if (ret < 0) {
 		NVT_ERR("i2c read error!(%d)\n", ret);
 		return ret;
@@ -161,7 +161,7 @@ int32_t Resume_PD(void)
 
 	buf[0] = 0x00;
 	buf[1] = 0xAB;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+	ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 	if (ret < 0) {
 		NVT_ERR("Write Enable error!!(%d)\n", ret);
 		return ret;
@@ -173,7 +173,7 @@ int32_t Resume_PD(void)
 		msleep(1);
 		buf[0] = 0x00;
 		buf[1] = 0x00;
-		ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+		ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 		if (ret < 0) {
 			NVT_ERR("Check 0xAA (Resume Command) error!!(%d)\n", ret);
 			return ret;
@@ -204,7 +204,7 @@ return:
 int32_t Check_CheckSum(void)
 {
 	uint8_t buf[64] = {0};
-	uint32_t XDATA_Addr = ts_a->mmap->READ_FLASH_CHECKSUM_ADDR;
+	uint32_t XDATA_Addr = ts->mmap->READ_FLASH_CHECKSUM_ADDR;
 	int32_t ret = 0;
 	int32_t i = 0;
 	int32_t k = 0;
@@ -239,7 +239,7 @@ int32_t Check_CheckSum(void)
 			buf[4] = 0x00;
 			buf[5] = ((len_in_blk - 1) >> 8) & 0xFF;
 			buf[6] = (len_in_blk - 1) & 0xFF;
-			ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 7);
+			ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 7);
 			if (ret < 0) {
 				NVT_ERR("Fast Read Command error!!(%d)\n", ret);
 				return ret;
@@ -250,7 +250,7 @@ int32_t Check_CheckSum(void)
 				msleep(80);
 				buf[0] = 0x00;
 				buf[1] = 0x00;
-				ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+				ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 				if (ret < 0) {
 					NVT_ERR("Check 0xAA (Fast Read Command) error!!(%d)\n", ret);
 					return ret;
@@ -268,7 +268,7 @@ int32_t Check_CheckSum(void)
 			buf[0] = 0xFF;
 			buf[1] = XDATA_Addr >> 16;
 			buf[2] = (XDATA_Addr >> 8) & 0xFF;
-			ret = CTP_I2C_WRITE_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+			ret = CTP_I2C_WRITE(ts->client, I2C_BLDR_Address, buf, 3);
 			if (ret < 0) {
 				NVT_ERR("Read Checksum (write addr high byte & middle byte) error!!(%d)\n", ret);
 				return ret;
@@ -277,7 +277,7 @@ int32_t Check_CheckSum(void)
 			buf[0] = (XDATA_Addr) & 0xFF;
 			buf[1] = 0x00;
 			buf[2] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+			ret = CTP_I2C_READ(ts->client, I2C_BLDR_Address, buf, 3);
 			if (ret < 0) {
 				NVT_ERR("Read Checksum error!!(%d)\n", ret);
 				return ret;
@@ -311,13 +311,13 @@ int32_t Init_BootLoader(void)
 	int32_t retry = 0;
 
 
-	nvt_sw_reset_idle_a();
+	nvt_sw_reset_idle();
 
 
 	buf[0] = 0x00;
 	buf[1] = 0x00;
 	buf[2] = I2C_FW_Address;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 3);
+	ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 3);
 	if (ret < 0) {
 		NVT_ERR("Inittial Flash Block error!!(%d)\n", ret);
 		return ret;
@@ -329,7 +329,7 @@ int32_t Init_BootLoader(void)
 		msleep(1);
 		buf[0] = 0x00;
 		buf[1] = 0x00;
-		ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+		ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 		if (ret < 0) {
 			NVT_ERR("Check 0xAA (Inittial Flash Block) error!!(%d)\n", ret);
 			return ret;
@@ -369,7 +369,7 @@ int32_t Erase_Flash(void)
 
 	buf[0] = 0x00;
 	buf[1] = 0x06;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+	ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 	if (ret < 0) {
 		NVT_ERR("Write Enable (for Write Status Register) error!!(%d)\n", ret);
 		return ret;
@@ -380,7 +380,7 @@ int32_t Erase_Flash(void)
 		mdelay(1);
 		buf[0] = 0x00;
 		buf[1] = 0x00;
-		ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+		ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 		if (ret < 0) {
 			NVT_ERR("Check 0xAA (Write Enable for Write Status Register) error!!(%d)\n", ret);
 			return ret;
@@ -399,7 +399,7 @@ int32_t Erase_Flash(void)
 	buf[0] = 0x00;
 	buf[1] = 0x01;
 	buf[2] = 0x00;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 3);
+	ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 3);
 	if (ret < 0) {
 		NVT_ERR("Write Status Register error!!(%d)\n", ret);
 		return ret;
@@ -410,7 +410,7 @@ int32_t Erase_Flash(void)
 		mdelay(1);
 		buf[0] = 0x00;
 		buf[1] = 0x00;
-		ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+		ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 		if (ret < 0) {
 			NVT_ERR("Check 0xAA (Write Status Register) error!!(%d)\n", ret);
 			return ret;
@@ -431,7 +431,7 @@ int32_t Erase_Flash(void)
 		mdelay(5);
 		buf[0] = 0x00;
 		buf[1] = 0x05;
-		ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+		ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 		if (ret < 0) {
 			NVT_ERR("Read Status (for Write Status Register) error!!(%d)\n", ret);
 			return ret;
@@ -441,7 +441,7 @@ int32_t Erase_Flash(void)
 		buf[0] = 0x00;
 		buf[1] = 0x00;
 		buf[2] = 0x00;
-		ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 3);
+		ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 3);
 		if (ret < 0) {
 			NVT_ERR("Check 0xAA (Read Status for Write Status Register) error!!(%d)\n", ret);
 			return ret;
@@ -465,7 +465,7 @@ int32_t Erase_Flash(void)
 
 		buf[0] = 0x00;
 		buf[1] = 0x06;
-		ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+		ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 		if (ret < 0) {
 			NVT_ERR("Write Enable error!!(%d,%d)\n", ret, i);
 			return ret;
@@ -476,7 +476,7 @@ int32_t Erase_Flash(void)
 			mdelay(1);
 			buf[0] = 0x00;
 			buf[1] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+			ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 			if (ret < 0) {
 				NVT_ERR("Check 0xAA (Write Enable) error!!(%d,%d)\n", ret, i);
 				return ret;
@@ -499,7 +499,7 @@ int32_t Erase_Flash(void)
 		buf[2] = ((Flash_Address >> 16) & 0xFF);
 		buf[3] = ((Flash_Address >> 8) & 0xFF);
 		buf[4] = (Flash_Address & 0xFF);
-		ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 5);
+		ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 5);
 		if (ret < 0) {
 			NVT_ERR("Sector Erase error!!(%d,%d)\n", ret, i);
 			return ret;
@@ -510,7 +510,7 @@ int32_t Erase_Flash(void)
 			mdelay(1);
 			buf[0] = 0x00;
 			buf[1] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+			ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 			if (ret < 0) {
 				NVT_ERR("Check 0xAA (Sector Erase) error!!(%d,%d)\n", ret, i);
 				return ret;
@@ -531,7 +531,7 @@ int32_t Erase_Flash(void)
 			mdelay(5);
 			buf[0] = 0x00;
 			buf[1] = 0x05;
-			ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+			ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 			if (ret < 0) {
 				NVT_ERR("Read Status error!!(%d,%d)\n", ret, i);
 				return ret;
@@ -541,7 +541,7 @@ int32_t Erase_Flash(void)
 			buf[0] = 0x00;
 			buf[1] = 0x00;
 			buf[2] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 3);
+			ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 3);
 			if (ret < 0) {
 				NVT_ERR("Check 0xAA (Read Status) error!!(%d,%d)\n", ret, i);
 				return ret;
@@ -571,7 +571,7 @@ return:
 int32_t Write_Flash(void)
 {
 	uint8_t buf[64] = {0};
-	uint32_t XDATA_Addr = ts_a->mmap->RW_FLASH_DATA_ADDR;
+	uint32_t XDATA_Addr = ts->mmap->RW_FLASH_DATA_ADDR;
 	uint32_t Flash_Address = 0;
 	int32_t i = 0, j = 0, k = 0;
 	uint8_t tmpvalue = 0;
@@ -583,7 +583,7 @@ int32_t Write_Flash(void)
 	buf[0] = 0xFF;
 	buf[1] = XDATA_Addr >> 16;
 	buf[2] = (XDATA_Addr >> 8) & 0xFF;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+	ret = CTP_I2C_WRITE(ts->client, I2C_BLDR_Address, buf, 3);
 	if (ret < 0) {
 		NVT_ERR("change I2C buffer index error!!(%d)\n", ret);
 		return ret;
@@ -600,7 +600,7 @@ int32_t Write_Flash(void)
 
 		buf[0] = 0x00;
 		buf[1] = 0x06;
-		ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+		ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 		if (ret < 0) {
 			NVT_ERR("Write Enable error!!(%d)\n", ret);
 			return ret;
@@ -611,7 +611,7 @@ int32_t Write_Flash(void)
 			udelay(100);
 			buf[0] = 0x00;
 			buf[1] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+			ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 			if (ret < 0) {
 				NVT_ERR("Check 0xAA (Write Enable) error!!(%d,%d)\n", ret, i);
 				return ret;
@@ -632,7 +632,7 @@ int32_t Write_Flash(void)
 			for (k = 0; k < 32; k++) {
 				buf[1 + k] = fw_entry->data[Flash_Address + j + k];
 			}
-			ret = CTP_I2C_WRITE_A(ts_a->client, I2C_BLDR_Address, buf, 33);
+			ret = CTP_I2C_WRITE(ts->client, I2C_BLDR_Address, buf, 33);
 			if (ret < 0) {
 				NVT_ERR("Write Page error!!(%d), j=%d\n", ret, j);
 				return ret;
@@ -657,7 +657,7 @@ int32_t Write_Flash(void)
 		buf[5] = 0x00;
 		buf[6] = min(fw_entry->size - Flash_Address,(size_t)256) - 1;
 		buf[7] = tmpvalue;
-		ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 8);
+		ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 8);
 		if (ret < 0) {
 			NVT_ERR("Page Program error!!(%d), i=%d\n", ret, i);
 			return ret;
@@ -668,7 +668,7 @@ int32_t Write_Flash(void)
 			mdelay(1);
 			buf[0] = 0x00;
 			buf[1] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+			ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 			if (ret < 0) {
 				NVT_ERR("Page Program error!!(%d)\n", ret);
 				return ret;
@@ -693,7 +693,7 @@ int32_t Write_Flash(void)
 			mdelay(5);
 			buf[0] = 0x00;
 			buf[1] = 0x05;
-			ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+			ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 			if (ret < 0) {
 				NVT_ERR("Read Status error!!(%d)\n", ret);
 				return ret;
@@ -703,7 +703,7 @@ int32_t Write_Flash(void)
 			buf[0] = 0x00;
 			buf[1] = 0x00;
 			buf[2] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 3);
+			ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 3);
 			if (ret < 0) {
 				NVT_ERR("Check 0xAA (Read Status) error!!(%d)\n", ret);
 				return ret;
@@ -741,7 +741,7 @@ return:
 int32_t Verify_Flash(void)
 {
 	uint8_t buf[64] = {0};
-	uint32_t XDATA_Addr = ts_a->mmap->READ_FLASH_CHECKSUM_ADDR;
+	uint32_t XDATA_Addr = ts->mmap->READ_FLASH_CHECKSUM_ADDR;
 	int32_t ret = 0;
 	int32_t i = 0;
 	int32_t k = 0;
@@ -771,7 +771,7 @@ int32_t Verify_Flash(void)
 			buf[4] = 0x00;
 			buf[5] = ((len_in_blk - 1) >> 8) & 0xFF;
 			buf[6] = (len_in_blk - 1) & 0xFF;
-			ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 7);
+			ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 7);
 			if (ret < 0) {
 				NVT_ERR("Fast Read Command error!!(%d)\n", ret);
 				return ret;
@@ -782,7 +782,7 @@ int32_t Verify_Flash(void)
 				msleep(80);
 				buf[0] = 0x00;
 				buf[1] = 0x00;
-				ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+				ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 				if (ret < 0) {
 					NVT_ERR("Check 0xAA (Fast Read Command) error!!(%d)\n", ret);
 					return ret;
@@ -800,7 +800,7 @@ int32_t Verify_Flash(void)
 			buf[0] = 0xFF;
 			buf[1] = XDATA_Addr >> 16;
 			buf[2] = (XDATA_Addr >> 8) & 0xFF;
-			ret = CTP_I2C_WRITE_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+			ret = CTP_I2C_WRITE(ts->client, I2C_BLDR_Address, buf, 3);
 			if (ret < 0) {
 				NVT_ERR("Read Checksum (write addr high byte & middle byte) error!!(%d)\n", ret);
 				return ret;
@@ -809,7 +809,7 @@ int32_t Verify_Flash(void)
 			buf[0] = (XDATA_Addr) & 0xFF;
 			buf[1] = 0x00;
 			buf[2] = 0x00;
-			ret = CTP_I2C_READ_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+			ret = CTP_I2C_READ(ts->client, I2C_BLDR_Address, buf, 3);
 			if (ret < 0) {
 				NVT_ERR("Read Checksum error!!(%d)\n", ret);
 				return ret;
@@ -873,8 +873,8 @@ int32_t Update_Firmware(void)
 	}
 
 
-	nvt_bootloader_reset_a();
-	nvt_check_fw_reset_state_a(RESET_STATE_INIT);
+	nvt_bootloader_reset();
+	nvt_check_fw_reset_state(RESET_STATE_INIT);
 
 	return ret;
 }
@@ -909,7 +909,7 @@ int32_t nvt_check_flash_end_flag(void)
 
 	buf[0] = 0x00;
 	buf[1] = 0x35;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 2);
+	ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 	if (ret < 0) {
 		NVT_ERR("write unlock error!!(%d)\n", ret);
 		return ret;
@@ -924,7 +924,7 @@ int32_t nvt_check_flash_end_flag(void)
 	buf[4] = NVT_FLASH_END_FLAG_ADDR & 0xFF;
 	buf[5] = (NVT_FLASH_END_FLAG_LEN >> 8) & 0xFF;
 	buf[6] = NVT_FLASH_END_FLAG_LEN & 0xFF;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_HW_Address, buf, 7);
+	ret = CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 7);
 	if (ret < 0) {
 		NVT_ERR("write Read Command error!!(%d)\n", ret);
 		return ret;
@@ -934,7 +934,7 @@ int32_t nvt_check_flash_end_flag(void)
 
 	buf[0] = 0x00;
 	buf[1] = 0x00;
-	ret = CTP_I2C_READ_A(ts_a->client, I2C_HW_Address, buf, 2);
+	ret = CTP_I2C_READ(ts->client, I2C_HW_Address, buf, 2);
 	if (ret < 0) {
 		NVT_ERR("Check 0xAA (Read Command) error!!(%d)\n", ret);
 		return ret;
@@ -948,9 +948,9 @@ int32_t nvt_check_flash_end_flag(void)
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts_a->mmap->READ_FLASH_CHECKSUM_ADDR >> 16) & 0xFF;
-	buf[2] = (ts_a->mmap->READ_FLASH_CHECKSUM_ADDR >> 8) & 0xFF;
-	ret = CTP_I2C_WRITE_A(ts_a->client, I2C_BLDR_Address, buf, 3);
+	buf[1] = (ts->mmap->READ_FLASH_CHECKSUM_ADDR >> 16) & 0xFF;
+	buf[2] = (ts->mmap->READ_FLASH_CHECKSUM_ADDR >> 8) & 0xFF;
+	ret = CTP_I2C_WRITE(ts->client, I2C_BLDR_Address, buf, 3);
 	if (ret < 0) {
 		NVT_ERR("change index error!! (%d)\n", ret);
 		return ret;
@@ -958,8 +958,8 @@ int32_t nvt_check_flash_end_flag(void)
 	msleep(10);
 
 
-	buf[0] = ts_a->mmap->READ_FLASH_CHECKSUM_ADDR & 0xFF;
-	ret = CTP_I2C_READ_A(ts_a->client, I2C_BLDR_Address, buf, 6);
+	buf[0] = ts->mmap->READ_FLASH_CHECKSUM_ADDR & 0xFF;
+	ret = CTP_I2C_READ(ts->client, I2C_BLDR_Address, buf, 6);
 	if (ret < 0) {
 		NVT_ERR("Read Back error!! (%d)\n", ret);
 		return ret;
@@ -1015,13 +1015,13 @@ void Boot_Update_Firmware(struct work_struct *work)
 		return;
 	}
 
-	mutex_lock(&ts_a->lock);
+	mutex_lock(&ts->lock);
 
 #if NVT_TOUCH_ESD_PROTECT
 	nvt_esd_check_enable(false);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
-	nvt_sw_reset_idle_a();
+	nvt_sw_reset_idle();
 
 	ret = Check_CheckSum();
 
@@ -1036,17 +1036,17 @@ void Boot_Update_Firmware(struct work_struct *work)
 		Update_Firmware();
 	} else {
 
-		nvt_bootloader_reset_a();
-		ret = nvt_check_fw_reset_state_a(RESET_STATE_INIT);
+		nvt_bootloader_reset();
+		ret = nvt_check_fw_reset_state(RESET_STATE_INIT);
 		if (ret) {
 			NVT_LOG("check fw reset state failed\n");
 			Update_Firmware();
 		}
 	}
 
-	mutex_unlock(&ts_a->lock);
+	mutex_unlock(&ts->lock);
 
 	update_firmware_release();
-	nvt_get_fw_info_a();
+	nvt_get_fw_info();
 }
 #endif /* BOOT_UPDATE_FIRMWARE */

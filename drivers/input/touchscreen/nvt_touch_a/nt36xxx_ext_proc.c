@@ -62,19 +62,19 @@ void nvt_change_mode(uint8_t mode)
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-	buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
+	buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+	buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
 
 
 	buf[0] = EVENT_MAP_HOST_CMD;
 	buf[1] = mode;
-	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 2);
+	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 2);
 
 	if (mode == NORMAL_MODE) {
 		buf[0] = EVENT_MAP_HANDSHAKING_or_SUB_CMD_BYTE;
 		buf[1] = HANDSHAKING_HOST_READY;
-		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 2);
+		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 2);
 		msleep(20);
 	}
 }
@@ -92,14 +92,14 @@ uint8_t nvt_get_fw_pipe(void)
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-	buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
+	buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+	buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
 
 
 	buf[0] = EVENT_MAP_HANDSHAKING_or_SUB_CMD_BYTE;
 	buf[1] = 0x00;
-	CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, 2);
+	CTP_I2C_READ(ts->client, I2C_FW_Address, buf, 2);
 
 
 
@@ -127,7 +127,7 @@ void nvt_read_mdata(uint32_t xdata_addr, uint32_t xdata_btn_addr)
 
 	head_addr = xdata_addr - (xdata_addr % XDATA_SECTOR_SIZE);
 	dummy_len = xdata_addr - head_addr;
-	data_len = ts_a->x_num * ts_a->y_num * 2;
+	data_len = ts->x_num * ts->y_num * 2;
 	residual_len = (head_addr + dummy_len + data_len) % XDATA_SECTOR_SIZE;
 
 
@@ -138,13 +138,13 @@ void nvt_read_mdata(uint32_t xdata_addr, uint32_t xdata_btn_addr)
 		buf[0] = 0xFF;
 		buf[1] = ((head_addr + XDATA_SECTOR_SIZE * i) >> 16) & 0xFF;
 		buf[2] = ((head_addr + XDATA_SECTOR_SIZE * i) >> 8) & 0xFF;
-		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
+		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
 
 
 		for (j = 0; j < (XDATA_SECTOR_SIZE / I2C_TANSFER_LENGTH); j++) {
 
 			buf[0] = I2C_TANSFER_LENGTH * j;
-			CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, I2C_TANSFER_LENGTH + 1);
+			CTP_I2C_READ(ts->client, I2C_FW_Address, buf, I2C_TANSFER_LENGTH + 1);
 
 
 			for (k = 0; k < I2C_TANSFER_LENGTH; k++) {
@@ -161,13 +161,13 @@ void nvt_read_mdata(uint32_t xdata_addr, uint32_t xdata_btn_addr)
 		buf[0] = 0xFF;
 		buf[1] = ((xdata_addr + data_len - residual_len) >> 16) & 0xFF;
 		buf[2] = ((xdata_addr + data_len - residual_len) >> 8) & 0xFF;
-		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
+		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
 
 
 		for (j = 0; j < (residual_len / I2C_TANSFER_LENGTH + 1); j++) {
 
 			buf[0] = I2C_TANSFER_LENGTH * j;
-			CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, I2C_TANSFER_LENGTH + 1);
+			CTP_I2C_READ(ts->client, I2C_FW_Address, buf, I2C_TANSFER_LENGTH + 1);
 
 
 			for (k = 0; k < I2C_TANSFER_LENGTH; k++) {
@@ -189,23 +189,23 @@ void nvt_read_mdata(uint32_t xdata_addr, uint32_t xdata_btn_addr)
 	buf[0] = 0xFF;
 	buf[1] = (xdata_btn_addr >> 16) & 0xFF;
 	buf[2] = ((xdata_btn_addr >> 8) & 0xFF);
-	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
+	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
 
 
 	buf[0] = (xdata_btn_addr & 0xFF);
-	CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, (TOUCH_KEY_NUM * 2 + 1));
+	CTP_I2C_READ(ts->client, I2C_FW_Address, buf, (TOUCH_KEY_NUM * 2 + 1));
 
 
 	for (i = 0; i < TOUCH_KEY_NUM; i++) {
-		xdata[ts_a->x_num * ts_a->y_num + i] = (int16_t)(buf[1 + i * 2] + 256 * buf[1 + i * 2 + 1]);
+		xdata[ts->x_num * ts->y_num + i] = (int16_t)(buf[1 + i * 2] + 256 * buf[1 + i * 2 + 1]);
 	}
 #endif
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-	buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
+	buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+	buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
 }
 
 /*******************************************************
@@ -220,12 +220,12 @@ void nvt_read_mdata_rss(uint32_t xdata_i_addr, uint32_t xdata_q_addr, uint32_t x
 	int i = 0;
 
 	nvt_read_mdata(xdata_i_addr, xdata_btn_i_addr);
-	memcpy(xdata_i, xdata, ((ts_a->x_num * ts_a->y_num + TOUCH_KEY_NUM) * sizeof(int32_t)));
+	memcpy(xdata_i, xdata, ((ts->x_num * ts->y_num + TOUCH_KEY_NUM) * sizeof(int32_t)));
 
 	nvt_read_mdata(xdata_q_addr, xdata_btn_q_addr);
-	memcpy(xdata_q, xdata, ((ts_a->x_num * ts_a->y_num + TOUCH_KEY_NUM) * sizeof(int32_t)));
+	memcpy(xdata_q, xdata, ((ts->x_num * ts->y_num + TOUCH_KEY_NUM) * sizeof(int32_t)));
 
-	for (i = 0; i < (ts_a->x_num * ts_a->y_num + TOUCH_KEY_NUM); i++) {
+	for (i = 0; i < (ts->x_num * ts->y_num + TOUCH_KEY_NUM); i++) {
 		xdata[i] = (int32_t)int_sqrt((unsigned long)(xdata_i[i] * xdata_i[i]) + (unsigned long)(xdata_q[i] * xdata_q[i]));
 	}
 }
@@ -239,9 +239,9 @@ return:
 *******************************************************/
 void nvt_get_mdata(int32_t *buf, uint8_t *m_x_num, uint8_t *m_y_num)
 {
-    *m_x_num = ts_a->x_num;
-    *m_y_num = ts_a->y_num;
-    memcpy(buf, xdata, ((ts_a->x_num * ts_a->y_num + TOUCH_KEY_NUM) * sizeof(int32_t)));
+    *m_x_num = ts->x_num;
+    *m_y_num = ts->y_num;
+    memcpy(buf, xdata, ((ts->x_num * ts->y_num + TOUCH_KEY_NUM) * sizeof(int32_t)));
 }
 
 /*******************************************************
@@ -253,7 +253,7 @@ return:
 *******************************************************/
 static int32_t c_fw_version_show(struct seq_file *m, void *v)
 {
-	seq_printf(m, "fw_ver=%d, x_num=%d, y_num=%d, button_num=%d\n", ts_a->fw_ver, ts_a->x_num, ts_a->y_num, ts_a->max_button_num);
+	seq_printf(m, "fw_ver=%d, x_num=%d, y_num=%d, button_num=%d\n", ts->fw_ver, ts->x_num, ts->y_num, ts->max_button_num);
 	return 0;
 }
 
@@ -270,18 +270,18 @@ static int32_t c_show(struct seq_file *m, void *v)
 	int32_t i = 0;
 	int32_t j = 0;
 
-	for (i = 0; i < ts_a->y_num; i++) {
-		for (j = 0; j < ts_a->x_num; j++) {
-			seq_printf(m, "%5d, ", xdata[i * ts_a->x_num + j]);
+	for (i = 0; i < ts->y_num; i++) {
+		for (j = 0; j < ts->x_num; j++) {
+			seq_printf(m, "%5d, ", xdata[i * ts->x_num + j]);
 		}
-		seq_puts_a(m, "\n");
+		seq_puts(m, "\n");
 	}
 
 #if TOUCH_KEY_NUM > 0
 	for (i = 0; i < TOUCH_KEY_NUM; i++) {
-		seq_printf(m, "%5d, ", xdata[ts_a->x_num * ts_a->y_num + i]);
+		seq_printf(m, "%5d, ", xdata[ts->x_num * ts->y_num + i]);
 	}
-	seq_puts_a(m, "\n");
+	seq_puts(m, "\n");
 #endif
 
 	seq_printf(m, "\n\n");
@@ -355,8 +355,8 @@ return:
 *******************************************************/
 static int32_t nvt_fw_version_open(struct inode *inode, struct file *file)
 {
-	if (mutex_lock_interruptible(&ts_a->lock)) {
-		return -ERESTARts_aYS;
+	if (mutex_lock_interruptible(&ts->lock)) {
+		return -ERESTARTSYS;
 	}
 
 	NVT_LOG("++\n");
@@ -365,12 +365,12 @@ static int32_t nvt_fw_version_open(struct inode *inode, struct file *file)
 	nvt_esd_check_enable(false);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
-	if (nvt_get_fw_info_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_get_fw_info()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
-	mutex_unlock(&ts_a->lock);
+	mutex_unlock(&ts->lock);
 
 	NVT_LOG("--\n");
 
@@ -394,8 +394,8 @@ return:
 *******************************************************/
 static int32_t nvt_baseline_open(struct inode *inode, struct file *file)
 {
-	if (mutex_lock_interruptible(&ts_a->lock)) {
-		return -ERESTARts_aYS;
+	if (mutex_lock_interruptible(&ts->lock)) {
+		return -ERESTARTSYS;
 	}
 
 	NVT_LOG("++\n");
@@ -404,33 +404,33 @@ static int32_t nvt_baseline_open(struct inode *inode, struct file *file)
 	nvt_esd_check_enable(false);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
-	if (nvt_clear_fw_status_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_clear_fw_status()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
 	nvt_change_mode(TEST_MODE_2);
 
-	if (nvt_check_fw_status_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_check_fw_status()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
-	if (nvt_get_fw_info_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_get_fw_info()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
-	if (ts_a->carrier_system) {
-		nvt_read_mdata_rss(ts_a->mmap->BASELINE_ADDR, ts_a->mmap->BASELINE_Q_ADDR,
-				ts_a->mmap->BASELINE_BTN_ADDR, ts_a->mmap->BASELINE_BTN_Q_ADDR);
+	if (ts->carrier_system) {
+		nvt_read_mdata_rss(ts->mmap->BASELINE_ADDR, ts->mmap->BASELINE_Q_ADDR,
+				ts->mmap->BASELINE_BTN_ADDR, ts->mmap->BASELINE_BTN_Q_ADDR);
 	} else {
-		nvt_read_mdata(ts_a->mmap->BASELINE_ADDR, ts_a->mmap->BASELINE_BTN_ADDR);
+		nvt_read_mdata(ts->mmap->BASELINE_ADDR, ts->mmap->BASELINE_BTN_ADDR);
 	}
 
 	nvt_change_mode(NORMAL_MODE);
 
-	mutex_unlock(&ts_a->lock);
+	mutex_unlock(&ts->lock);
 
 	NVT_LOG("--\n");
 
@@ -454,8 +454,8 @@ return:
 *******************************************************/
 static int32_t nvt_raw_open(struct inode *inode, struct file *file)
 {
-	if (mutex_lock_interruptible(&ts_a->lock)) {
-		return -ERESTARts_aYS;
+	if (mutex_lock_interruptible(&ts->lock)) {
+		return -ERESTARTSYS;
 	}
 
 	NVT_LOG("++\n");
@@ -464,40 +464,40 @@ static int32_t nvt_raw_open(struct inode *inode, struct file *file)
 	nvt_esd_check_enable(false);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
-	if (nvt_clear_fw_status_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_clear_fw_status()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
 	nvt_change_mode(TEST_MODE_2);
 
-	if (nvt_check_fw_status_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_check_fw_status()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
-	if (nvt_get_fw_info_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_get_fw_info()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
-	if (ts_a->carrier_system) {
+	if (ts->carrier_system) {
 		if (nvt_get_fw_pipe() == 0)
-			nvt_read_mdata_rss(ts_a->mmap->RAW_PIPE0_ADDR, ts_a->mmap->RAW_PIPE0_Q_ADDR,
-				ts_a->mmap->RAW_BTN_PIPE0_ADDR, ts_a->mmap->RAW_BTN_PIPE0_Q_ADDR);
+			nvt_read_mdata_rss(ts->mmap->RAW_PIPE0_ADDR, ts->mmap->RAW_PIPE0_Q_ADDR,
+				ts->mmap->RAW_BTN_PIPE0_ADDR, ts->mmap->RAW_BTN_PIPE0_Q_ADDR);
 		else
-			nvt_read_mdata_rss(ts_a->mmap->RAW_PIPE1_ADDR, ts_a->mmap->RAW_PIPE1_Q_ADDR,
-				ts_a->mmap->RAW_BTN_PIPE1_ADDR, ts_a->mmap->RAW_BTN_PIPE1_Q_ADDR);
+			nvt_read_mdata_rss(ts->mmap->RAW_PIPE1_ADDR, ts->mmap->RAW_PIPE1_Q_ADDR,
+				ts->mmap->RAW_BTN_PIPE1_ADDR, ts->mmap->RAW_BTN_PIPE1_Q_ADDR);
 	} else {
 		if (nvt_get_fw_pipe() == 0)
-			nvt_read_mdata(ts_a->mmap->RAW_PIPE0_ADDR, ts_a->mmap->RAW_BTN_PIPE0_ADDR);
+			nvt_read_mdata(ts->mmap->RAW_PIPE0_ADDR, ts->mmap->RAW_BTN_PIPE0_ADDR);
 		else
-			nvt_read_mdata(ts_a->mmap->RAW_PIPE1_ADDR, ts_a->mmap->RAW_BTN_PIPE1_ADDR);
+			nvt_read_mdata(ts->mmap->RAW_PIPE1_ADDR, ts->mmap->RAW_BTN_PIPE1_ADDR);
 	}
 
 	nvt_change_mode(NORMAL_MODE);
 
-	mutex_unlock(&ts_a->lock);
+	mutex_unlock(&ts->lock);
 
 	NVT_LOG("--\n");
 
@@ -521,8 +521,8 @@ return:
 *******************************************************/
 static int32_t nvt_diff_open(struct inode *inode, struct file *file)
 {
-	if (mutex_lock_interruptible(&ts_a->lock)) {
-		return -ERESTARts_aYS;
+	if (mutex_lock_interruptible(&ts->lock)) {
+		return -ERESTARTSYS;
 	}
 
 	NVT_LOG("++\n");
@@ -531,40 +531,40 @@ static int32_t nvt_diff_open(struct inode *inode, struct file *file)
 	nvt_esd_check_enable(false);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
-	if (nvt_clear_fw_status_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_clear_fw_status()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
 	nvt_change_mode(TEST_MODE_2);
 
-	if (nvt_check_fw_status_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_check_fw_status()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
-	if (nvt_get_fw_info_a()) {
-		mutex_unlock(&ts_a->lock);
+	if (nvt_get_fw_info()) {
+		mutex_unlock(&ts->lock);
 		return -EAGAIN;
 	}
 
-	if (ts_a->carrier_system) {
+	if (ts->carrier_system) {
 		if (nvt_get_fw_pipe() == 0)
-			nvt_read_mdata_rss(ts_a->mmap->DIFF_PIPE0_ADDR, ts_a->mmap->DIFF_PIPE0_Q_ADDR,
-				ts_a->mmap->DIFF_BTN_PIPE0_ADDR, ts_a->mmap->DIFF_BTN_PIPE0_Q_ADDR);
+			nvt_read_mdata_rss(ts->mmap->DIFF_PIPE0_ADDR, ts->mmap->DIFF_PIPE0_Q_ADDR,
+				ts->mmap->DIFF_BTN_PIPE0_ADDR, ts->mmap->DIFF_BTN_PIPE0_Q_ADDR);
 		else
-			nvt_read_mdata_rss(ts_a->mmap->DIFF_PIPE1_ADDR, ts_a->mmap->DIFF_PIPE1_Q_ADDR,
-				ts_a->mmap->DIFF_BTN_PIPE1_ADDR, ts_a->mmap->DIFF_BTN_PIPE1_Q_ADDR);
+			nvt_read_mdata_rss(ts->mmap->DIFF_PIPE1_ADDR, ts->mmap->DIFF_PIPE1_Q_ADDR,
+				ts->mmap->DIFF_BTN_PIPE1_ADDR, ts->mmap->DIFF_BTN_PIPE1_Q_ADDR);
 	} else {
 		if (nvt_get_fw_pipe() == 0)
-			nvt_read_mdata(ts_a->mmap->DIFF_PIPE0_ADDR, ts_a->mmap->DIFF_BTN_PIPE0_ADDR);
+			nvt_read_mdata(ts->mmap->DIFF_PIPE0_ADDR, ts->mmap->DIFF_BTN_PIPE0_ADDR);
 		else
-			nvt_read_mdata(ts_a->mmap->DIFF_PIPE1_ADDR, ts_a->mmap->DIFF_BTN_PIPE1_ADDR);
+			nvt_read_mdata(ts->mmap->DIFF_PIPE1_ADDR, ts->mmap->DIFF_BTN_PIPE1_ADDR);
 	}
 
 	nvt_change_mode(NORMAL_MODE);
 
-	mutex_unlock(&ts_a->lock);
+	mutex_unlock(&ts->lock);
 
 	NVT_LOG("--\n");
 

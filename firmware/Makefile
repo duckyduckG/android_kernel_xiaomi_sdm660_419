@@ -21,6 +21,10 @@ fw-external-y := $(subst $(quote),,$(CONFIG_EXTRA_FIRMWARE))
 # accurate. In the latter case it doesn't matter -- it'll use $(fw-shipped-all).
 # But be aware that the config file might not be included at all.
 
+# HMI_L8867_A01
+fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_F7A) += novatek/tianma_nt36672a_miui_f7a.bin
+fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_F7A) += novatek/shenchao_nt36672a_miui_f7a.bin
+fw-shipped-$(CONFIG_TOUCHSCREEN_SYNAPTICS_TCM_REFLASH) += synaptics/boe_td4320_i2c_F7A.img
 
 # HMI_L6662_A01
 fw-shipped-$(CONFIG_TOUCHSCREEN_NVT_A) += novatek/shenchao_nt36672a_miui_e7t.bin

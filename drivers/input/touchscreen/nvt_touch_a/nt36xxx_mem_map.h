@@ -17,7 +17,7 @@
  *
  */
 
-struct nvt_ts_mem_map {
+struct nvt_ts_a_mem_map {
 	uint32_t EVENT_BUF_ADDR;
 	uint32_t RAW_PIPE0_ADDR;
 	uint32_t RAW_PIPE0_Q_ADDR;
@@ -43,7 +43,7 @@ struct nvt_ts_mem_map {
 	uint32_t RW_FLASH_DATA_ADDR;
 };
 
-static const struct nvt_ts_mem_map NT36672A_memory_map = {
+static const struct nvt_ts_a_mem_map NT36672A_memory_map = {
 	.EVENT_BUF_ADDR           = 0x21C00,
 	.RAW_PIPE0_ADDR           = 0x20000,
 	.RAW_PIPE0_Q_ADDR         = 0,
@@ -69,7 +69,7 @@ static const struct nvt_ts_mem_map NT36672A_memory_map = {
 	.RW_FLASH_DATA_ADDR       = 0x24002,
 };
 
-static const struct nvt_ts_mem_map NT36772_memory_map = {
+static const struct nvt_ts_a_mem_map NT36772_memory_map = {
 	.EVENT_BUF_ADDR           = 0x11E00,
 	.RAW_PIPE0_ADDR           = 0x10000,
 	.RAW_PIPE0_Q_ADDR         = 0,
@@ -95,7 +95,7 @@ static const struct nvt_ts_mem_map NT36772_memory_map = {
 	.RW_FLASH_DATA_ADDR       = 0x14002,
 };
 
-static const struct nvt_ts_mem_map NT36525_memory_map = {
+static const struct nvt_ts_a_mem_map NT36525_memory_map = {
 	.EVENT_BUF_ADDR           = 0x11A00,
 	.RAW_PIPE0_ADDR           = 0x10000,
 	.RAW_PIPE0_Q_ADDR         = 0,
@@ -121,7 +121,7 @@ static const struct nvt_ts_mem_map NT36525_memory_map = {
 	.RW_FLASH_DATA_ADDR       = 0x14002,
 };
 
-static const struct nvt_ts_mem_map NT36870_memory_map = {
+static const struct nvt_ts_a_mem_map NT36870_memory_map = {
 	.EVENT_BUF_ADDR           = 0x25000,
 	.RAW_PIPE0_ADDR           = 0x20000,
 	.RAW_PIPE0_Q_ADDR         = 0x204C8,
@@ -147,7 +147,7 @@ static const struct nvt_ts_mem_map NT36870_memory_map = {
 	.RW_FLASH_DATA_ADDR       = 0x24002,
 };
 
-static const struct nvt_ts_mem_map NT36676F_memory_map = {
+static const struct nvt_ts_a_mem_map NT36676F_memory_map = {
 	.EVENT_BUF_ADDR           = 0x11A00,
 	.RAW_PIPE0_ADDR           = 0x10000,
 	.RAW_PIPE0_Q_ADDR         = 0,
@@ -174,14 +174,14 @@ static const struct nvt_ts_mem_map NT36676F_memory_map = {
 };
 
 #define NVT_ID_BYTE_MAX 6
-struct nvt_ts_trim_id_table {
+struct nvt_ts_a_trim_id_table {
 	uint8_t id[NVT_ID_BYTE_MAX];
 	uint8_t mask[NVT_ID_BYTE_MAX];
-	const struct nvt_ts_mem_map *mmap;
+	const struct nvt_ts_a_mem_map *mmap;
 	uint8_t carrier_system;
 };
 
-static const struct nvt_ts_trim_id_table trim_id_table[] = {
+static const struct nvt_ts_a_trim_id_table trim_id_table[] = {
 	{.id = {0x0A, 0xFF, 0xFF, 0x72, 0x66, 0x03}, .mask = {1, 0, 0, 1, 1, 1},
 		.mmap = &NT36672A_memory_map, .carrier_system = 0},
 	{.id = {0x55, 0x00, 0xFF, 0x00, 0x00, 0x00}, .mask = {1, 1, 0, 1, 1, 1},

@@ -253,7 +253,7 @@ static void nvt_print_criteria(void)
 {
 	NVT_LOG("++\n");
 
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 
 		printk("PS_Config_Lmt_Short_Diff_P:\n");
 		nvt_print_lmt_array(PS_Config_Lmt_Short_Diff_P, X_Channel, Y_Channel);
@@ -284,7 +284,7 @@ static void nvt_print_criteria(void)
 	printk("PS_Config_Lmt_FW_Rawdata_N:\n");
 	nvt_print_lmt_array(PS_Config_Lmt_FW_Rawdata_N, X_Channel, Y_Channel);
 
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 
 		printk("PS_Config_Lmt_FW_CC_I_P:\n");
 		nvt_print_lmt_array(PS_Config_Lmt_FW_CC_I_P, X_Channel, Y_Channel);
@@ -413,14 +413,14 @@ static int32_t nvt_polling_hand_shake_status(void)
 	for (i = 0; i < retry; i++) {
 
 		buf[0] = 0xFF;
-		buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-		buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+		buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+		buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 
 
 		buf[0] = EVENT_MAP_HANDSHAKING_or_SUB_CMD_BYTE;
 		buf[1] = 0x00;
-		CTP_I2C_READ(ts->client, I2C_FW_Address, buf, 2);
+		CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, 2);
 
 		if ((buf[1] == 0xA0) || (buf[1] == 0xA1))
 			break;
@@ -433,9 +433,9 @@ static int32_t nvt_polling_hand_shake_status(void)
 
 
 		buf[0] = 0xFF;
-		buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-		buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+		buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+		buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 
 		buf[0] = EVENT_MAP_HOST_CMD;
 		buf[1] = 0x00;
@@ -443,7 +443,7 @@ static int32_t nvt_polling_hand_shake_status(void)
 		buf[3] = 0x00;
 		buf[4] = 0x00;
 		buf[5] = 0x00;
-		CTP_I2C_READ(ts->client, I2C_FW_Address, buf, 6);
+		CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, 6);
 		NVT_ERR("Read back 5 bytes from offset EVENT_MAP_HOST_CMD: 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X\n", buf[1], buf[2], buf[3], buf[4], buf[5]);
 
 		return -1;
@@ -463,20 +463,20 @@ static int8_t nvt_switch_FreqHopEnDis(uint8_t FreqHopEnDis)
 	for (retry = 0; retry < 20; retry++) {
 
 		buf[0] = 0xFF;
-		buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-		buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+		buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+		buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 
 
 		buf[0] = EVENT_MAP_HOST_CMD;
 		buf[1] = FreqHopEnDis;
-		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 2);
+		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 2);
 
 		msleep(35);
 
 		buf[0] = EVENT_MAP_HOST_CMD;
 		buf[1] = 0xFF;
-		CTP_I2C_READ(ts->client, I2C_FW_Address, buf, 2);
+		CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, 2);
 
 		if (buf[1] == 0x00)
 			break;
@@ -505,14 +505,14 @@ static int32_t nvt_read_baseline(int32_t *xdata)
 
 	NVT_LOG("++\n");
 
-	nvt_read_mdata(ts->mmap->BASELINE_ADDR, ts->mmap->BASELINE_BTN_ADDR);
+	nvt_read_mdata(ts_a->mmap->BASELINE_ADDR, ts_a->mmap->BASELINE_BTN_ADDR);
 
 	nvt_get_mdata(xdata, &x_num, &y_num);
 
 	for (y = 0; y < y_num; y++) {
 		for (x = 0; x < x_num; x++) {
 			iArrayIndex = y * x_num + x;
-			if (ts->carrier_system) {
+			if (ts_a->carrier_system) {
 				xdata[iArrayIndex] = (uint16_t)xdata[iArrayIndex];
 			} else {
 				xdata[iArrayIndex] = (int16_t)xdata[iArrayIndex];
@@ -522,7 +522,7 @@ static int32_t nvt_read_baseline(int32_t *xdata)
 #if TOUCH_KEY_NUM > 0
 	for (k = 0; k < Key_Channel; k++) {
 		iArrayIndex = Y_Channel * X_Channel + k;
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			xdata[iArrayIndex] = (uint16_t)xdata[iArrayIndex];
 		} else {
 			xdata[iArrayIndex] = (int16_t)xdata[iArrayIndex];
@@ -558,16 +558,16 @@ static int32_t nvt_read_CC(int32_t *xdata)
 	NVT_LOG("++\n");
 
 	if (nvt_get_fw_pipe() == 0)
-		nvt_read_mdata(ts->mmap->DIFF_PIPE1_ADDR, ts->mmap->DIFF_BTN_PIPE1_ADDR);
+		nvt_read_mdata(ts_a->mmap->DIFF_PIPE1_ADDR, ts_a->mmap->DIFF_BTN_PIPE1_ADDR);
 	else
-		nvt_read_mdata(ts->mmap->DIFF_PIPE0_ADDR, ts->mmap->DIFF_BTN_PIPE0_ADDR);
+		nvt_read_mdata(ts_a->mmap->DIFF_PIPE0_ADDR, ts_a->mmap->DIFF_BTN_PIPE0_ADDR);
 
 	nvt_get_mdata(xdata, &x_num, &y_num);
 
 	for (y = 0; y < y_num; y++) {
 		for (x = 0; x < x_num; x++) {
 			iArrayIndex = y * x_num + x;
-			if (ts->carrier_system) {
+			if (ts_a->carrier_system) {
 				xdata_tmp = xdata[iArrayIndex];
 				RawData_FW_CC_I[iArrayIndex] = (uint8_t)(xdata_tmp & 0xFF);
 				RawData_FW_CC_Q[iArrayIndex] = (uint8_t)((xdata_tmp >> 8) & 0xFF);
@@ -579,7 +579,7 @@ static int32_t nvt_read_CC(int32_t *xdata)
 #if TOUCH_KEY_NUM > 0
 	for (k = 0; k < Key_Channel; k++) {
 		iArrayIndex = Y_Channel * X_Channel + k;
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			xdata_tmp = xdata[iArrayIndex];
 			RawData_FW_CC_I[iArrayIndex] = (uint8_t)(xdata_tmp & 0xFF);
 			RawData_FW_CC_Q[iArrayIndex] = (uint8_t)((xdata_tmp >> 8) & 0xFF);
@@ -590,7 +590,7 @@ static int32_t nvt_read_CC(int32_t *xdata)
 #endif /* #if TOUCH_KEY_NUM > 0 */
 
 	printk("%s:\n", __func__);
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 		printk("%s:RawData_CC_I:\n", __func__);
 
 		if (nvt_save_rawdata_to_csv(RawData_FW_CC_I, X_Channel, Y_Channel, FW_CC_CSV_FILE, 0) < 0) {
@@ -627,9 +627,9 @@ static void nvt_enable_noise_collect(int32_t frame_num)
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-	buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+	buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+	buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 
 
 	buf[0] = EVENT_MAP_HOST_CMD;
@@ -637,7 +637,7 @@ static void nvt_enable_noise_collect(int32_t frame_num)
 	buf[2] = 0xAA;
 	buf[3] = frame_num;
 	buf[4] = 0x00;
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 5);
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 5);
 }
 
 static int32_t nvt_read_fw_noise(int32_t *xdata)
@@ -656,7 +656,7 @@ static int32_t nvt_read_fw_noise(int32_t *xdata)
 	NVT_LOG("++\n");
 
 
-	if (nvt_clear_fw_status()) {
+	if (nvt_clear_fw_status_a()) {
 		return -EAGAIN;
 	}
 
@@ -672,21 +672,21 @@ static int32_t nvt_read_fw_noise(int32_t *xdata)
 		return -EAGAIN;
 	}
 
-	if (nvt_get_fw_info()) {
+	if (nvt_get_fw_info_a()) {
 		return -EAGAIN;
 	}
 
 	if (nvt_get_fw_pipe() == 0)
-		nvt_read_mdata(ts->mmap->DIFF_PIPE0_ADDR, ts->mmap->DIFF_BTN_PIPE0_ADDR);
+		nvt_read_mdata(ts_a->mmap->DIFF_PIPE0_ADDR, ts_a->mmap->DIFF_BTN_PIPE0_ADDR);
 	else
-		nvt_read_mdata(ts->mmap->DIFF_PIPE1_ADDR, ts->mmap->DIFF_BTN_PIPE1_ADDR);
+		nvt_read_mdata(ts_a->mmap->DIFF_PIPE1_ADDR, ts_a->mmap->DIFF_BTN_PIPE1_ADDR);
 
 	nvt_get_mdata(xdata, &x_num, &y_num);
 
 	for (y = 0; y < y_num; y++) {
 		for (x = 0; x < x_num; x++) {
 			iArrayIndex = y * x_num + x;
-			if (ts->carrier_system) {
+			if (ts_a->carrier_system) {
 				RawData_Diff_Max[iArrayIndex] = (uint16_t)xdata[iArrayIndex];
 				RawData_Diff_Min[iArrayIndex] = 0;
 			} else {
@@ -698,7 +698,7 @@ static int32_t nvt_read_fw_noise(int32_t *xdata)
 #if TOUCH_KEY_NUM > 0
 	for (k = 0; k < Key_Channel; k++) {
 		iArrayIndex = Y_Channel * X_Channel + k;
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			RawData_Diff_Max[iArrayIndex] = (uint16_t)xdata[iArrayIndex];
 			RawData_Diff_Min[iArrayIndex] = 0;
 		} else {
@@ -718,7 +718,7 @@ static int32_t nvt_read_fw_noise(int32_t *xdata)
 		return -EAGAIN;
 	}
 
-	if (!ts->carrier_system) {
+	if (!ts_a->carrier_system) {
 #if TOUCH_KEY_NUM > 0
 		rawdata_diff_min_offset = Y_Channel * X_Channel * 7 + Y_Channel * 2 + Key_Channel * 7 + 2;
 #else
@@ -743,9 +743,9 @@ static void nvt_enable_open_test(void)
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-	buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+	buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+	buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 
 
 	buf[0] = EVENT_MAP_HOST_CMD;
@@ -753,7 +753,7 @@ static void nvt_enable_open_test(void)
 	buf[2] = 0xAA;
 	buf[3] = 0x02;
 	buf[4] = 0x00;
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 5);
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 5);
 }
 
 static void nvt_enable_short_test(void)
@@ -762,9 +762,9 @@ static void nvt_enable_short_test(void)
 
 
 	buf[0] = 0xFF;
-	buf[1] = (ts->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
-	buf[2] = (ts->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+	buf[1] = (ts_a->mmap->EVENT_BUF_ADDR >> 16) & 0xFF;
+	buf[2] = (ts_a->mmap->EVENT_BUF_ADDR >> 8) & 0xFF;
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 
 
 	buf[0] = EVENT_MAP_HOST_CMD;
@@ -772,7 +772,7 @@ static void nvt_enable_short_test(void)
 	buf[2] = 0xAA;
 	buf[3] = 0x02;
 	buf[4] = 0x00;
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 5);
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 5);
 }
 
 static int32_t nvt_read_fw_open(int32_t *xdata,int test_flag)
@@ -790,7 +790,7 @@ static int32_t nvt_read_fw_open(int32_t *xdata,int test_flag)
 	NVT_LOG("++\n");
 
 
-	if (nvt_clear_fw_status()) {
+	if (nvt_clear_fw_status_a()) {
 		return -EAGAIN;
 	}
 
@@ -811,33 +811,33 @@ static int32_t nvt_read_fw_open(int32_t *xdata,int test_flag)
 	}
 
 	if (nvt_get_fw_pipe() == 0)
-		raw_pipe_addr = ts->mmap->RAW_PIPE0_ADDR;
+		raw_pipe_addr = ts_a->mmap->RAW_PIPE0_ADDR;
 	else
-		raw_pipe_addr = ts->mmap->RAW_PIPE1_ADDR;
+		raw_pipe_addr = ts_a->mmap->RAW_PIPE1_ADDR;
 
 	for (y = 0; y < IC_Y_CFG_SIZE; y++) {
 
 		buf[0] = 0xFF;
 		buf[1] = (uint8_t)(((raw_pipe_addr + y * IC_X_CFG_SIZE * 2) >> 16) & 0xFF);
 		buf[2] = (uint8_t)(((raw_pipe_addr + y * IC_X_CFG_SIZE * 2) >> 8) & 0xFF);
-		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 		buf[0] = (uint8_t)((raw_pipe_addr + y * IC_X_CFG_SIZE * 2) & 0xFF);
-		CTP_I2C_READ(ts->client, I2C_FW_Address, buf, IC_X_CFG_SIZE * 2 + 1);
+		CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, IC_X_CFG_SIZE * 2 + 1);
 		memcpy(rawdata_buf + y * IC_X_CFG_SIZE * 2, buf + 1, IC_X_CFG_SIZE * 2);
 	}
 #if TOUCH_KEY_NUM > 0
 	if (nvt_get_fw_pipe() == 0)
-		raw_btn_pipe_addr = ts->mmap->RAW_BTN_PIPE0_ADDR;
+		raw_btn_pipe_addr = ts_a->mmap->RAW_BTN_PIPE0_ADDR;
 	else
-		raw_btn_pipe_addr = ts->mmap->RAW_BTN_PIPE1_ADDR;
+		raw_btn_pipe_addr = ts_a->mmap->RAW_BTN_PIPE1_ADDR;
 
 
 	buf[0] = 0xFF;
 	buf[1] = (uint8_t)((raw_btn_pipe_addr >> 16) & 0xFF);
 	buf[2] = (uint8_t)((raw_btn_pipe_addr >> 8) & 0xFF);
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 	buf[0] = (uint8_t)(raw_btn_pipe_addr & 0xFF);
-	CTP_I2C_READ(ts->client, I2C_FW_Address, buf, IC_KEY_CFG_SIZE * 2 + 1);
+	CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, IC_KEY_CFG_SIZE * 2 + 1);
 	memcpy(rawdata_buf + IC_Y_CFG_SIZE * IC_X_CFG_SIZE * 2, buf + 1, IC_KEY_CFG_SIZE * 2);
 #endif /* #if TOUCH_KEY_NUM > 0 */
 
@@ -894,7 +894,7 @@ static int32_t nvt_read_fw_short(int32_t *xdata, int test_flag)
 	NVT_LOG("++\n");
 
 
-	if (nvt_clear_fw_status()) {
+	if (nvt_clear_fw_status_a()) {
 		return -EAGAIN;
 	}
 
@@ -914,14 +914,14 @@ static int32_t nvt_read_fw_short(int32_t *xdata, int test_flag)
 		return -ENOMEM;
 	}
 
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 
-		raw_pipe_addr = ts->mmap->RAW_PIPE0_ADDR;
+		raw_pipe_addr = ts_a->mmap->RAW_PIPE0_ADDR;
 	} else {
 		if (nvt_get_fw_pipe() == 0)
-			raw_pipe_addr = ts->mmap->RAW_PIPE0_ADDR;
+			raw_pipe_addr = ts_a->mmap->RAW_PIPE0_ADDR;
 		else
-			raw_pipe_addr = ts->mmap->RAW_PIPE1_ADDR;
+			raw_pipe_addr = ts_a->mmap->RAW_PIPE1_ADDR;
 	}
 
 	for (y = 0; y < Y_Channel; y++) {
@@ -929,29 +929,29 @@ static int32_t nvt_read_fw_short(int32_t *xdata, int test_flag)
 		buf[0] = 0xFF;
 		buf[1] = (uint8_t)(((raw_pipe_addr + y * X_Channel * 2) >> 16) & 0xFF);
 		buf[2] = (uint8_t)(((raw_pipe_addr + y * X_Channel * 2) >> 8) & 0xFF);
-		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 		buf[0] = (uint8_t)((raw_pipe_addr + y * X_Channel * 2) & 0xFF);
-		CTP_I2C_READ(ts->client, I2C_FW_Address, buf, X_Channel * 2 + 1);
+		CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, X_Channel * 2 + 1);
 		memcpy(rawdata_buf + y * X_Channel * 2, buf + 1, X_Channel * 2);
 	}
 #if TOUCH_KEY_NUM > 0
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 
-		raw_btn_pipe_addr = ts->mmap->RAW_BTN_PIPE0_ADDR;
+		raw_btn_pipe_addr = ts_a->mmap->RAW_BTN_PIPE0_ADDR;
 	} else {
 		if (nvt_get_fw_pipe() == 0)
-			raw_btn_pipe_addr = ts->mmap->RAW_BTN_PIPE0_ADDR;
+			raw_btn_pipe_addr = ts_a->mmap->RAW_BTN_PIPE0_ADDR;
 		else
-			raw_btn_pipe_addr = ts->mmap->RAW_BTN_PIPE1_ADDR;
+			raw_btn_pipe_addr = ts_a->mmap->RAW_BTN_PIPE1_ADDR;
 	}
 
 
 	buf[0] = 0xFF;
 	buf[1] = (uint8_t)((raw_btn_pipe_addr >> 16) & 0xFF);
 	buf[2] = (uint8_t)((raw_btn_pipe_addr >> 8) & 0xFF);
-	CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+	CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 	buf[0] = (uint8_t)(raw_btn_pipe_addr & 0xFF);
-	CTP_I2C_READ(ts->client, I2C_FW_Address, buf, Key_Channel * 2 + 1);
+	CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, Key_Channel * 2 + 1);
 	memcpy(rawdata_buf + Y_Channel * X_Channel * 2, buf + 1, Key_Channel * 2);
 #endif /* #if TOUCH_KEY_NUM > 0 */
 
@@ -969,31 +969,31 @@ static int32_t nvt_read_fw_short(int32_t *xdata, int test_flag)
 #endif /* #if TOUCH_KEY_NUM > 0 */
 
 
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 
-		raw_pipe_addr = ts->mmap->RAW_PIPE1_ADDR;
+		raw_pipe_addr = ts_a->mmap->RAW_PIPE1_ADDR;
 
 		for (y = 0; y < Y_Channel; y++) {
 
 			buf[0] = 0xFF;
 			buf[1] = (uint8_t)(((raw_pipe_addr + y * X_Channel * 2) >> 16) & 0xFF);
 			buf[2] = (uint8_t)(((raw_pipe_addr + y * X_Channel * 2) >> 8) & 0xFF);
-			CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+			CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 			buf[0] = (uint8_t)((raw_pipe_addr + y * X_Channel * 2) & 0xFF);
-			CTP_I2C_READ(ts->client, I2C_FW_Address, buf, X_Channel * 2 + 1);
+			CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, X_Channel * 2 + 1);
 			memcpy(rawdata_buf + y * X_Channel * 2, buf + 1, X_Channel * 2);
 		}
 #if TOUCH_KEY_NUM > 0
 
-		raw_btn_pipe_addr = ts->mmap->RAW_BTN_PIPE1_ADDR;
+		raw_btn_pipe_addr = ts_a->mmap->RAW_BTN_PIPE1_ADDR;
 
 
 		buf[0] = 0xFF;
 		buf[1] = (uint8_t)((raw_btn_pipe_addr >> 16) & 0xFF);
 		buf[2] = (uint8_t)((raw_btn_pipe_addr >> 8) & 0xFF);
-		CTP_I2C_WRITE(ts->client, I2C_FW_Address, buf, 3);
+		CTP_I2C_WRITE_A(ts_a->client, I2C_FW_Address, buf, 3);
 		buf[0] = (uint8_t)(raw_btn_pipe_addr & 0xFF);
-		CTP_I2C_READ(ts->client, I2C_FW_Address, buf, Key_Channel * 2 + 1);
+		CTP_I2C_READ_A(ts_a->client, I2C_FW_Address, buf, Key_Channel * 2 + 1);
 		memcpy(rawdata_buf + Y_Channel * X_Channel * 2, buf + 1, Key_Channel * 2);
 #endif /* #if TOUCH_KEY_NUM > 0 */
 
@@ -1019,7 +1019,7 @@ static int32_t nvt_read_fw_short(int32_t *xdata, int test_flag)
 
 	nvt_change_mode(NORMAL_MODE);
 
-	if (ts->carrier_system)
+	if (ts_a->carrier_system)
 		printk("%s:RawData_Short_Diff:\n", __func__);
 	else
 		printk("%s:RawData_Short\n", __func__);
@@ -1029,7 +1029,7 @@ static int32_t nvt_read_fw_short(int32_t *xdata, int test_flag)
 		NVT_ERR("save rawdata to CSV file failed\n");
 		return -EAGAIN;
 	}
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 #if TOUCH_KEY_NUM > 0
 		rawdata_short_base_offset = Y_Channel * X_Channel * 7 + Y_Channel * 2 + Key_Channel * 7 + 2;
 #else
@@ -1192,13 +1192,13 @@ static int32_t c_show_selftest(struct seq_file *m, void *v)
 {
 	NVT_LOG("++\n");
 /*
-	nvt_mp_seq_printf(m, "FW Version: %d\n\n", ts->fw_ver);
+	nvt_mp_seq_printf(m, "FW Version: %d\n\n", ts_a->fw_ver);
 
 	nvt_mp_seq_printf(m, "Short Test");
 	if ((TestResult_Short == 0) || (TestResult_Short == 1)) {
 		print_selftest_result(m, TestResult_Short, RecordResult_Short, RawData_Short, X_Channel, Y_Channel);
 	} else { // TestResult_Short is -1
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			nvt_mp_seq_printf(m, " FAIL!\n");
 			if (TestResult_Short_Diff == -1) {
 				nvt_mp_seq_printf(m, "Short Diff");
@@ -1226,7 +1226,7 @@ static int32_t c_show_selftest(struct seq_file *m, void *v)
 			print_selftest_result(m, TestResult_FWMutual, RecordResult_FWMutual, RawData_FWMutual, X_Channel, Y_Channel);
 		}
 		if (TestResult_FW_CC == -1) {
-			if (ts->carrier_system) {
+			if (ts_a->carrier_system) {
 				if (TestResult_FW_CC_I == -1) {
 					nvt_mp_seq_printf(m, "FW CC_I");
 					print_selftest_result(m, TestResult_FW_CC_I, RecordResult_FW_CC_I, RawData_FW_CC_I, X_Channel, Y_Channel);
@@ -1369,7 +1369,7 @@ return:
 *******************************************************/
 static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 {
-	struct device_node *np = ts->client->dev.of_node;
+	struct device_node *np = ts_a->client->dev.of_node;
 	unsigned char mpcriteria[32] = {0};
 
 	TestResult_Short = 0;
@@ -1387,21 +1387,21 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 
 	NVT_LOG("++\n");
 
-	if (mutex_lock_interruptible(&ts->lock)) {
-		return -ERESTARTSYS;
+	if (mutex_lock_interruptible(&ts_a->lock)) {
+		return -ERESTARts_aYS;
 	}
 
 #if NVT_TOUCH_ESD_PROTECT
 	nvt_esd_check_enable(false);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
-	if (nvt_get_fw_info()) {
-		mutex_unlock(&ts->lock);
+	if (nvt_get_fw_info_a()) {
+		mutex_unlock(&ts_a->lock);
 		NVT_ERR("get fw info failed!\n");
 		return -EAGAIN;
 	}
 
-	/* Parsing criteria from dts */
+	/* Parsing criteria from dts_a */
 	if(of_property_read_bool(np, "novatek,mp-support-dt")) {
 		/*
 		 * Parsing Criteria by Novatek PID
@@ -1411,7 +1411,7 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 		 * Ex. nvt_pid = 500A
 		 *     mpcriteria = "novatek-mp-criteria-500A"
 		 */
-		snprintf(mpcriteria, sizeof(mpcriteria), "novatek-mp-criteria-%04X", ts->nvt_pid);
+		snprintf(mpcriteria, sizeof(mpcriteria), "novatek-mp-criteria-%04X", ts_a->nvt_pid);
 
 		nvt_mp_parse_dt(np, mpcriteria);
 	} else {
@@ -1421,13 +1421,13 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 	}
 
 	if (nvt_switch_FreqHopEnDis(FREQ_HOP_DISABLE)) {
-		mutex_unlock(&ts->lock);
+		mutex_unlock(&ts_a->lock);
 		NVT_ERR("switch frequency hopping disable failed!\n");
 		return -EAGAIN;
 	}
 
-	if (nvt_check_fw_reset_state(RESET_STATE_NORMAL_RUN)) {
-		mutex_unlock(&ts->lock);
+	if (nvt_check_fw_reset_state_a(RESET_STATE_NORMAL_RUN)) {
+		mutex_unlock(&ts_a->lock);
 		NVT_ERR("check fw reset state failed!\n");
 		return -EAGAIN;
 	}
@@ -1435,16 +1435,16 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 	msleep(100);
 
 
-	if (nvt_clear_fw_status()) {
-		mutex_unlock(&ts->lock);
+	if (nvt_clear_fw_status_a()) {
+		mutex_unlock(&ts_a->lock);
 		NVT_ERR("clear fw status failed!\n");
 		return -EAGAIN;
 	}
 
 	nvt_change_mode(MP_MODE_CC);
 
-	if (nvt_check_fw_status()) {
-		mutex_unlock(&ts->lock);
+	if (nvt_check_fw_status_a()) {
+		mutex_unlock(&ts_a->lock);
 		NVT_ERR("check fw status failed!\n");
 		return -EAGAIN;
 	}
@@ -1458,12 +1458,12 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 	}
 	if (nvt_read_CC(RawData_FW_CC) != 0) {
 		TestResult_FW_CC = 1;
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			TestResult_FW_CC_I = 1;
 			TestResult_FW_CC_Q = 1;
 		}
 	} else {
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			TestResult_FW_CC_I = RawDataTest_SinglePoint_Sub(RawData_FW_CC_I, RecordResult_FW_CC_I, X_Channel, Y_Channel,
 												PS_Config_Lmt_FW_CC_I_P, PS_Config_Lmt_FW_CC_I_N);
 			TestResult_FW_CC_Q = RawDataTest_SinglePoint_Sub(RawData_FW_CC_Q, RecordResult_FW_CC_Q, X_Channel, Y_Channel,
@@ -1500,7 +1500,7 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 											PS_Config_Lmt_FW_Diff_P, PS_Config_Lmt_FW_Diff_N);
 
 
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			TestResult_FW_DiffMin = 0;
 		} else {
 			TestResult_FW_DiffMin = RawDataTest_SinglePoint_Sub(RawData_Diff_Min, RecordResult_FW_DiffMin, X_Channel, Y_Channel,
@@ -1516,13 +1516,13 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 
 	if (nvt_read_fw_short(RawData_Short,1) != 0) {
 		TestResult_Short = 1;
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			TestResult_Short_Diff = 1;
 			TestResult_Short_Base = 1;
 		}
 	} else {
 
-		if (ts->carrier_system) {
+		if (ts_a->carrier_system) {
 			TestResult_Short_Diff = RawDataTest_SinglePoint_Sub(RawData_Short_Diff, RecordResult_Short_Diff, X_Channel, Y_Channel,
 											PS_Config_Lmt_Short_Diff_P, PS_Config_Lmt_Short_Diff_N);
 			TestResult_Short_Base = RawDataTest_SinglePoint_Sub(RawData_Short_Base, RecordResult_Short_Base, X_Channel, Y_Channel,
@@ -1548,9 +1548,9 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 	}
 
 
-	nvt_bootloader_reset();
+	nvt_bootloader_reset_a();
 
-	mutex_unlock(&ts->lock);
+	mutex_unlock(&ts_a->lock);
 
 	NVT_LOG("--\n");
 
@@ -1603,7 +1603,7 @@ void nvt_mp_parse_ain(struct device_node *np, const char *name, uint8_t *array, 
 			array[i] = tmp[i];
 
 #if NVT_DEBUG
-		printk("[NVT-ts] %s = ", name);
+		printk("[NVT-ts_a] %s = ", name);
 		for (i = 0; i < len; i++) {
 			printk("%02d ", array[i]);
 		}
@@ -1664,7 +1664,7 @@ void nvt_mp_parse_array(struct device_node *np, const char *name, int32_t *array
 #if NVT_DEBUG
 		NVT_LOG("%s =\n", name);
 		for (j = 0; j < Y_Channel; j++) {
-			printk("[NVT-ts] ");
+			printk("[NVT-ts_a] ");
 			for (i = 0; i < X_Channel; i++) {
 				iArrayIndex = j * X_Channel + i;
 				printk("%5d, ", array[iArrayIndex]);
@@ -1672,7 +1672,7 @@ void nvt_mp_parse_array(struct device_node *np, const char *name, int32_t *array
 			printk("\n");
 		}
 #if TOUCH_KEY_NUM > 0
-		printk("[NVT-ts] ");
+		printk("[NVT-ts_a] ");
 		for (i = 0; i < Key_Channel; i++) {
 			iArrayIndex++;
 			printk("%5d, ", array[iArrayIndex]);
@@ -1733,7 +1733,7 @@ void nvt_mp_parse_dt(struct device_node *root, const char *node_compatible)
 #endif
 
 	/* MP Criteria */
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 		nvt_mp_parse_array(np, "PS_Config_Lmt_Short_Diff_P", PS_Config_Lmt_Short_Diff_P,
 				X_Channel * Y_Channel + Key_Channel);
 
@@ -1771,7 +1771,7 @@ void nvt_mp_parse_dt(struct device_node *root, const char *node_compatible)
 	nvt_mp_parse_array(np, "PS_Config_Lmt_FW_CC_N", PS_Config_Lmt_FW_CC_N,
 			X_Channel * Y_Channel + Key_Channel);
 
-	if (ts->carrier_system) {
+	if (ts_a->carrier_system) {
 		nvt_mp_parse_array(np, "PS_Config_Lmt_FW_CC_I_P", PS_Config_Lmt_FW_CC_I_P,
 				X_Channel * Y_Channel + Key_Channel);
 

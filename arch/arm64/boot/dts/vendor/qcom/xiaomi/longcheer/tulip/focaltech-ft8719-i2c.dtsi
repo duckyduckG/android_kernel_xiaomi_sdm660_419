@@ -39,7 +39,7 @@
 		/* Novatek device tree node */
 
 	novatek@62 {
-		compatible = "novatek,NVT-ts";
+		compatible = "novatek,NVT-tulip";
 		reg = <0x62>;
 		status = "ok";
 

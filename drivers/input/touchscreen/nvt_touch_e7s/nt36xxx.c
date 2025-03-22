@@ -1751,7 +1751,7 @@ static const struct i2c_device_id nvt_ts_id[] = {
 
 #ifdef CONFIG_OF
 static struct of_device_id nvt_match_table[] = {
-	{ .compatible = "novatek,NVT-ts",},
+	{ .compatible = "novatek,NVT-whyred",},
 	{ },
 };
 #endif

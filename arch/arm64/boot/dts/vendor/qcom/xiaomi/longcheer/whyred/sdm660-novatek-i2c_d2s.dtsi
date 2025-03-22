@@ -35,7 +35,7 @@
 	/* Novatek device tree node */
 	status = "ok";
 	novatek@62 {
-		compatible = "novatek,NVT-ts";
+		compatible = "novatek,NVT-whyred";
 		reg = <0x62>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <67 0x2008>;

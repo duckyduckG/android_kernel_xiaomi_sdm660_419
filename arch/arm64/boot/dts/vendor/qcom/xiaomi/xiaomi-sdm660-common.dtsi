@@ -3,12 +3,3 @@
 		qcom,force-warm-reboot;
 	};
 };
-
-&spmi_bus {
-	qcom,pm660@1 {
-		pm660_haptics {
-		qcom,actuator-type = "erm";
-		qcom,lra-resonance-sig-shape = "square";
-		};
-	};
-};

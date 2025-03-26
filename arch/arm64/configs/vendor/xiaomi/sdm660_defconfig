@@ -794,5 +794,3 @@ CONFIG_MTD_BLOCK2MTD=y
 # Memory Management options
 #
 CONFIG_KSM=y
-
-# CONFIG_ARM64_SVE is not set

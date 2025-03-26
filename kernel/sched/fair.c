@@ -12409,7 +12409,7 @@ static void rq_offline_fair(struct rq *rq)
 	unthrottle_offline_cfs_rqs(rq);
 }
 
-#endif /* CONFIG_SMP */
+/* CONFIG_SMP */
 
 /*
  * scheduler tick hitting a task of our scheduling class.

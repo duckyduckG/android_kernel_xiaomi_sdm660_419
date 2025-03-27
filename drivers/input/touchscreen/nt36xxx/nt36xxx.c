@@ -51,7 +51,7 @@ static int __init device_setup(char *s)
 }
 __setup("androidboot.hwdevice=", device_setup);
 
-void set_touchscreen_pins(void)
+static void __init set_touchscreen_pins(void)
 {
     if (is_tulip || is_lavender) {
         nvt_rst_pin = 66;
@@ -67,7 +67,7 @@ void set_touchscreen_pins(void)
     pr_info("Touchscreen Pins: RST=%d, INT=%d\n", nvt_rst_pin, nvt_int_pin);
 }
 
-void set_touchscreen_resolution(void)
+static void __init set_touchscreen_resolution(void)
 {
     if (is_tulip) {
         touch_max_height = 2280;
@@ -81,6 +81,14 @@ void set_touchscreen_resolution(void)
 
     pr_info("Touchscreen Resolution: %dx%d\n", touch_max_width, touch_max_height);
 }
+
+static int __init touchscreen_init(void)
+{
+    set_touchscreen_pins();
+    set_touchscreen_resolution();
+    return 0;
+}
+early_initcall(touchscreen_init);
 
 #if TOUCHSCREEN_LAVENDER
 extern char g_lcd_id[128];

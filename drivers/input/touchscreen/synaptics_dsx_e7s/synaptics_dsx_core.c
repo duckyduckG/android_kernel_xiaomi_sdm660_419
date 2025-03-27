@@ -1026,6 +1026,17 @@ static int synaptics_rmi4_f12_wg(struct synaptics_rmi4_data *rmi4_data,
 			break;
 	}
 
+	if (!fhandler || fhandler->fn_number != SYNAPTICS_RMI4_F12) {
+		dev_err(rmi4_data->pdev->dev.parent,
+			"%s: Function handler not found\n", __func__);
+		return -ENODEV;
+	}
+
+	if (!fhandler->extra) {
+		dev_err(rmi4_data->pdev->dev.parent, "%s: Extra data is NULL\n", __func__);
+		return -EINVAL;
+	}
+
 	extra_data = (struct synaptics_rmi4_f12_extra_data *)fhandler->extra;
 	offset = extra_data->ctrl20_offset;
 
@@ -1064,6 +1075,16 @@ static int synaptics_rmi4_f12_wg(struct synaptics_rmi4_data *rmi4_data,
 static void synaptics_rmi4_wakeup_gesture(struct synaptics_rmi4_data *rmi4_data,
 		bool enable)
 {
+	if (!rmi4_data) {
+		pr_err("%s: rmi4_data is NULL!\n", __func__);
+		return;
+	}
+
+	if (!rmi4_data->f11_wakeup_gesture && !rmi4_data->f12_wakeup_gesture) {
+		pr_err("%s: No wakeup gesture function available!\n", __func__);
+		return;
+	}
+
 	if (rmi4_data->f11_wakeup_gesture)
 		synaptics_rmi4_f11_wg(rmi4_data, enable);
 	else if (rmi4_data->f12_wakeup_gesture)

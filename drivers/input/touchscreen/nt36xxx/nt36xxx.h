@@ -17,6 +17,9 @@
 #include "nt36xxx_mem_map.h"
 #include <linux/regulator/consumer.h>
 #include <uapi/linux/sched/types.h>
+// FIXME
+//extern int device_variant_tulip;
+//extern int device_variant_whyred;
 
 // Xiaomi Panel specific
 #ifdef CONFIG_MACH_LONGCHEER
@@ -49,13 +52,15 @@
 #define TOUCHSCREEN_LAVENDER 0
 #endif
 
+/*
 #if TOUCHSCREEN_TULIP || TOUCHSCREEN_LAVENDER
 #define NVTTOUCH_RST_PIN 66
 #define NVTTOUCH_INT_PIN 67
-#else
+#elif TOUCHSCREEN_WHYRED || TOUCHSCREEN_WAYNE
 #define NVT_TOUCH_RST_PIN 980
 #define NVT_TOUCH_INT_PIN 943
 #endif
+*/
 
 #define INT_TRIGGER_TYPE IRQ_TYPE_EDGE_RISING
 
@@ -65,6 +70,7 @@
 #define I2C_HW_Address 0x62
 #define NVT_TS_NAME "NVTCapacitiveTouchScreen"
 
+/*
 #define TOUCH_DEFAULT_MAX_WIDTH 1080
 #if TOUCHSCREEN_WHYRED || TOUCHSCREEN_WAYNE
 #define TOUCH_DEFAULT_MAX_HEIGHT 2160
@@ -75,10 +81,17 @@
 #else
 #define TOUCH_DEFAULT_MAX_HEIGHT 1920
 #endif
+*/
+
 #define TOUCH_MAX_FINGER_NUM 10
 #define TOUCH_FORCE_NUM 1000
 
-#define NVT_TOUCH_SUPPORT_HW_RST 0
+// Enable or Disable HW Reset Support if any of these devices are selected
+#if defined(TOUCHSCREEN_WHYRED) || defined(TOUCHSCREEN_TULIP) || defined(TOUCHSCREEN_WAYNE)
+    #define NVT_TOUCH_SUPPORT_HW_RST 0
+#else
+    #define NVT_TOUCH_SUPPORT_HW_RST 0
+#endif
 
 #define WAKEUP_GESTURE 1
 #if WAKEUP_GESTURE
@@ -88,13 +101,12 @@ extern const uint16_t gesture_key_array[];
 #define BOOT_UPDATE_FIRMWARE 0
 #else
 #define BOOT_UPDATE_FIRMWARE 1
-#if TOUCHSCREEN_TULIP
+
+#if defined(TOUCHSCREEN_TULIP) || defined(TOUCHSCREEN_WHYRED) || defined(TOUCHSCREEN_WAYNE)
 #define BOOT_UPDATE_FIRMWARE_NAME_TIANMA "novatek/tianma_nt36672a_miui_e7t.bin"
 #define BOOT_UPDATE_FIRMWARE_NAME_SHENCHAO "novatek/shenchao_nt36672a_miui_e7t.bin"
-#elif TOUCHSCREEN_WHYRED
 #define BOOT_UPDATE_FIRMWARE_NAME "novatek/nt36672_miui_e7s.bin"
 #define BOOT_UPDATE_FIRMWARE_NAME_TWO "novatek/hx_nt36672_miui_e7s.bin"
-#elif TOUCHSCREEN_WAYNE
 #define BOOT_UPDATE_FIRMWARE_NAME_TIANMA "novatek/tianma_nt36672_miui_d2s.bin"
 #define BOOT_UPDATE_FIRMWARE_NAME_JDI "novatek/jdi_nt36672_miui_d2s.bin"
 #elif TOUCHSCREEN_LAVENDER

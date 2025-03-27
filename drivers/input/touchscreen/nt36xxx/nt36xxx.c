@@ -9,6 +9,7 @@
 
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/gpio.h>
@@ -18,6 +19,68 @@
 #include <linux/notifier.h>
 #include <linux/fb.h>
 #include "nt36xxx.h"
+
+
+int is_tulip = 0;
+int is_whyred = 0;
+int is_wayne = 0;
+int is_lavender = 0;
+
+int nvt_rst_pin = -1;  // SHT VALUE //
+int nvt_int_pin = -1; // SHT VALUE //
+
+int touch_max_width = 1080;  // Default SHT
+int touch_max_height = 1920; // Default SHT
+
+static int __init device_setup(char *s)
+{
+    if (strcmp(s, "tulip") == 0) {
+        is_tulip = 1;
+    } else if (strcmp(s, "whyred") == 0) {
+        is_whyred = 1;
+    } else if (strcmp(s, "wayne") == 0) {
+        is_wayne = 1;
+    } else if (strcmp(s, "lavender") == 0) {
+        is_lavender = 1;
+    }
+
+    pr_info("Device Setup: tulip=%d, whyred=%d, wayne=%d, lavender=%d\n",
+            is_tulip, is_whyred, is_wayne, is_lavender);
+
+    return 1;
+}
+__setup("androidboot.hwdevice=", device_setup);
+
+void set_touchscreen_pins(void)
+{
+    if (is_tulip || is_lavender) {
+        nvt_rst_pin = 66;
+        nvt_int_pin = 67;
+    } else if (is_whyred || is_wayne) {
+        nvt_rst_pin = 980;
+        nvt_int_pin = 943;
+    } else {
+        nvt_rst_pin = 100;  // FALLBACK SHT //
+        nvt_int_pin = 101;
+    }
+
+    pr_info("Touchscreen Pins: RST=%d, INT=%d\n", nvt_rst_pin, nvt_int_pin);
+}
+
+void set_touchscreen_resolution(void)
+{
+    if (is_tulip) {
+        touch_max_height = 2280;
+    } else if (is_lavender) {
+        touch_max_height = 2340;
+    } else if (is_whyred || is_wayne) {
+        touch_max_height = 2160;
+    } else {
+        touch_max_height = 1920;  // Default SHT
+    }
+
+    pr_info("Touchscreen Resolution: %dx%d\n", touch_max_width, touch_max_height);
+}
 
 #if TOUCHSCREEN_LAVENDER
 extern char g_lcd_id[128];
@@ -380,8 +443,8 @@ info_retry:
 	if ((buf[1] + buf[2]) != 0xFF) {
 		ts->x_num = 18;
 		ts->y_num = 32;
-		ts->abs_x_max = TOUCH_DEFAULT_MAX_WIDTH;
-		ts->abs_y_max = TOUCH_DEFAULT_MAX_HEIGHT;
+		ts->abs_x_max = touch_max_width;
+		ts->abs_y_max = touch_max_height;
 
 		if (retry_count < 3) {
 			retry_count++;
@@ -402,15 +465,16 @@ static inline void nvt_parse_dt(struct device *dev)
 	struct device_node *np = dev->of_node;
 
 #if NVT_TOUCH_SUPPORT_HW_RST || TOUCHSCREEN_WHYRED || TOUCHSCREEN_WAYNE
-	ts->reset_gpio = of_get_named_gpio_flags(np, "novatek,reset-gpio", 0, &ts->reset_flags);
+       ts->reset_gpio = of_get_named_gpio_flags(np, "novatek,reset-gpio", 0, &ts->reset_flags);
 #endif
-	ts->irq_gpio = of_get_named_gpio_flags(np, "novatek,irq-gpio", 0, &ts->irq_flags);
+       ts->irq_gpio = of_get_named_gpio_flags(np, "novatek,irq-gpio", 0, &ts->irq_flags);
 #else
 #if NVT_TOUCH_SUPPORT_HW_RST
-	ts->reset_gpio = NVT_TOUCH_RST_PIN;
+       ts->reset_gpio = nvt_rst_pin;
 #endif
-	ts->irq_gpio = NVT_TOUCH_INT_PIN;
+       ts->irq_gpio = nvt_int_pin;
 #endif
+    pr_info("nvt_parse_dt: reset_gpio=%d, irq_gpio=%d\n", ts->reset_gpio, ts->irq_gpio);
 }
 
 static inline int nvt_gpio_config(struct nvt_ts_data *ts)

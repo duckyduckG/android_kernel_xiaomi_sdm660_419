@@ -152,6 +152,7 @@ typedef int (*msm_queue_find_func)(void *d1, void *d2);
 	unsigned long flags;					\
 	struct msm_queue_head *__q = (queue);			\
 	type *node = NULL; \
+	typeof(node) __ret = NULL; \
 	msm_queue_find_func __f = (func); \
 	spin_lock_irqsave(&__q->lock, flags);			\
 	if (!list_empty(&__q->list)) { \
@@ -161,6 +162,7 @@ typedef int (*msm_queue_find_func)(void *d1, void *d2);
 		} \
 	} \
 	spin_unlock_irqrestore(&__q->lock, flags); \
+	__ret; \
 })
 
 static void msm_init_queue(struct msm_queue_head *qhead)

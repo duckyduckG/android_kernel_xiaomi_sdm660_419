@@ -46,6 +46,17 @@ config MSMB_CAMERA_OSS
      help
        Say Y here to use OSS Qualcomm msm camera and video capture 2.0.
 
+menuconfig MSMB_CAMERA_LEGACY
+      bool "QTI MSM camera and video capture 2.0 legacy support"
+      depends on ARCH_QCOM && VIDEO_V4L2 && I2C
+      select MSMB_CAMERA
+      help
+        Say Y here to enable selecting the video adapters for
+        QTI msm camera and video capture 2.0, enabling this
+        adds support for the camera driver stack including sensor, isp
+        and postprocessing drivers.
+        Legacy msm-4.4 version
+
 config MSMB_CAMERA_DEBUG
      bool "QTI MSM camera 2.0 debugging with printk"
      depends on MSMB_CAMERA
@@ -58,7 +69,7 @@ config MSMB_CAMERA_DEBUG
 
 if MSMB_CAMERA
 if MACH_XIAOMI_WHYRED
-source "drivers/media/platform/msm/camera_v2-whyred/Kconfig"
+source "drivers/media/platform/msm/camera_v2-legacy/Kconfig"
 endif
 if !MACH_XIAOMI_WHYRED || !MSM_CAMERA_OSS
 source "drivers/media/platform/msm/camera_v2/Kconfig"

@@ -69,7 +69,7 @@ config MSMB_CAMERA_DEBUG
 
 if MSMB_CAMERA
 if MACH_XIAOMI_WHYRED
-source "drivers/media/platform/msm/camera_v2-legacy/Kconfig"
+source "drivers/media/platform/msm/camera_v2/Kconfig"
 endif
 if !MACH_XIAOMI_WHYRED || !MSM_CAMERA_OSS
 source "drivers/media/platform/msm/camera_v2/Kconfig"

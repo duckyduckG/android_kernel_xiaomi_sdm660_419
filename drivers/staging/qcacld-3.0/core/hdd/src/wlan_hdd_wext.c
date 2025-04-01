@@ -3405,10 +3405,8 @@ static QDF_STATUS hdd_wlan_get_ibss_peer_info(struct hdd_adapter *adapter,
 {
 	QDF_STATUS status = QDF_STATUS_E_FAILURE;
 	mac_handle_t mac_handle = adapter->hdd_ctx->mac_handle;
-#ifdef WLAN_DEBUG
 	struct hdd_station_ctx *sta_ctx = WLAN_HDD_GET_STATION_CTX_PTR(adapter);
 	tSirPeerInfoRspParams *peer_info = &sta_ctx->ibss_peer_info;
-#endif
 
 	INIT_COMPLETION(adapter->ibss_peer_info_comp);
 	status = sme_request_ibss_peer_info(mac_handle, adapter,
@@ -3426,7 +3424,6 @@ static QDF_STATUS hdd_wlan_get_ibss_peer_info(struct hdd_adapter *adapter,
 			return QDF_STATUS_E_FAILURE;
 		}
 
-#ifdef WLAN_DEBUG
 		/** Print the peer info */
 		hdd_debug("peer_info->numIBSSPeers = %d ", peer_info->numPeers);
 		{
@@ -3439,7 +3436,6 @@ static QDF_STATUS hdd_wlan_get_ibss_peer_info(struct hdd_adapter *adapter,
 				mac_addr, (int)tx_rate,
 				(int)peer_info->peerInfoParams[0].rssi);
 		}
-#endif
 	} else {
 		hdd_warn("Warning: sme_request_ibss_peer_info Request failed");
 	}
@@ -3458,11 +3454,9 @@ static QDF_STATUS hdd_wlan_get_ibss_peer_info_all(struct hdd_adapter *adapter)
 {
 	QDF_STATUS status = QDF_STATUS_E_FAILURE;
 	mac_handle_t mac_handle = adapter->hdd_ctx->mac_handle;
-#ifdef WLAN_DEBUG
 	struct hdd_station_ctx *sta_ctx = WLAN_HDD_GET_STATION_CTX_PTR(adapter);
 	tSirPeerInfoRspParams *peer_info = &sta_ctx->ibss_peer_info;
-#endif
-	int i __maybe_unused;
+	int i;
 
 	INIT_COMPLETION(adapter->ibss_peer_info_comp);
 	status = sme_request_ibss_peer_info(mac_handle, adapter,
@@ -3480,7 +3474,6 @@ static QDF_STATUS hdd_wlan_get_ibss_peer_info_all(struct hdd_adapter *adapter)
 			return QDF_STATUS_E_FAILURE;
 		}
 
-#ifdef WLAN_DEBUG
 		/** Print the peer info */
 		hdd_debug("peer_info->numIBSSPeers = %d ",
 			(int)peer_info->numPeers);
@@ -3497,7 +3490,6 @@ static QDF_STATUS hdd_wlan_get_ibss_peer_info_all(struct hdd_adapter *adapter)
 				mac_addr, (int)tx_rate,
 				(int)peer_info->peerInfoParams[i].rssi);
 		}
-#endif
 	} else {
 		hdd_warn("Warning: sme_request_ibss_peer_info Request failed");
 	}

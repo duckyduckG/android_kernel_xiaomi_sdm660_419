@@ -1729,7 +1729,7 @@ static QDF_STATUS send_wow_enable_cmd_tlv(wmi_unified_t wmi_handle,
 		cmd->pause_iface_config = WOW_IFACE_PAUSE_DISABLED;
 	cmd->flags = param->flags;
 
-	WMI_LOGD("suspend type: %s",
+	WMI_LOGI("suspend type: %s",
 		cmd->pause_iface_config == WOW_IFACE_PAUSE_ENABLED ?
 		"WOW_IFACE_PAUSE_ENABLED" : "WOW_IFACE_PAUSE_DISABLED");
 
@@ -13162,8 +13162,6 @@ static void populate_tlv_service(uint32_t *wmi_service)
 			WMI_SERVICE_WPA3_SUITEB_ROAM_SUPPORT;
 	wmi_service[wmi_service_sae_eapol_offload_support] =
 			WMI_SERVICE_SAE_EAPOL_OFFLOAD_SUPPORT;
-	wmi_service[wmi_service_ll_stats_per_chan_rx_tx_time] =
-			WMI_SERVICE_LL_STATS_PER_CHAN_RX_TX_TIME_SUPPORT;
 }
 
 /**

@@ -2029,7 +2029,6 @@ struct hdd_context {
 #ifdef FW_THERMAL_THROTTLE_SUPPORT
 	uint8_t dutycycle_off_percent;
 #endif
-	bool ll_stats_per_chan_rx_tx_time;
 };
 
 /**
@@ -4301,7 +4300,6 @@ static inline void hdd_reset_monitor_interface(struct hdd_adapter *sta_adapter)
 
 static inline int hdd_is_pkt_capture_mon_enable(struct hdd_adapter *adapter)
 {
-return 0;
 }
 #endif /* WLAN_FEATURE_PKT_CAPTURE */
 

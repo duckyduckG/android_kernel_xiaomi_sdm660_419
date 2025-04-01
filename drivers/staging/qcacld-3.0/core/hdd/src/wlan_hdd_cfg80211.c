@@ -5324,17 +5324,13 @@ static int __wlan_hdd_cfg80211_disable_dfs_chan_scan(struct wiphy *wiphy,
 						     const void *data,
 						     int data_len)
 {
-#ifdef WLAN_DEBUG
 	struct net_device *dev = wdev->netdev;
-#endif
 	struct hdd_context *hdd_ctx  = wiphy_priv(wiphy);
 	struct nlattr *tb[QCA_WLAN_VENDOR_ATTR_SET_NO_DFS_FLAG_MAX + 1];
 	int ret_val;
 	uint32_t no_dfs_flag = 0;
 	bool enable_dfs_scan = true;
-#ifdef WLAN_DEBUG
 	hdd_enter_dev(dev);
-#endif
 
 	ret_val = wlan_hdd_validate_context(hdd_ctx);
 	if (ret_val)
@@ -18070,6 +18066,42 @@ int wlan_hdd_cfg80211_check_pmf_valid(struct csr_roam_profile *roam_profile)
 }
 #endif
 
+
+/**
+ * wlan_hdd_cfg80211_set_roam_profile() - set orig_sec_info to roam profile
+ * @adapter: Pointer to adapter
+ * @vdev: pointer to vdev object
+ *
+ * This function is used to set orig_sec_info to roam profile.
+ *
+ * Return: 0 for success, non-zero for failure
+ */
+static int wlan_hdd_cfg80211_set_roam_profile(struct hdd_adapter *adapter,
+					struct wlan_objmgr_vdev *vdev)
+{
+	struct csr_roam_profile *roam_profile;
+	struct wlan_crypto_comp_priv *crypto_priv;
+	struct wlan_crypto_params *crypto_params;
+
+	roam_profile = hdd_roam_profile(adapter);
+	crypto_params = wlan_crypto_vdev_get_comp_params(vdev, &crypto_priv);
+	if (!crypto_priv) {
+		hdd_err("crypto_priv NULL");
+		return -EINVAL;
+	}
+
+	/*Save crypto paramters to orig_sec_info*/
+	roam_profile->orig_sec_info.rsn_caps = crypto_params->rsn_caps;
+	roam_profile->orig_sec_info.authmodeset = crypto_params->authmodeset;
+	roam_profile->orig_sec_info.ucastcipherset = crypto_params->ucastcipherset;
+	roam_profile->orig_sec_info.mcastcipherset = crypto_params->mcastcipherset;
+	roam_profile->orig_sec_info.key_mgmt = crypto_params->key_mgmt;
+	roam_profile->orig_sec_info.mgmtcipherset = crypto_params->mgmtcipherset;
+
+	sme_debug("roam_profile[orig_sec]: key_mgmt 0x%x", roam_profile->orig_sec_info.key_mgmt);
+
+	return 0;
+}
 /**
  * wlan_hdd_cfg80211_connect_start() - to start the association process
  * @adapter: Pointer to adapter
@@ -18233,6 +18265,7 @@ static int wlan_hdd_cfg80211_connect_start(struct hdd_adapter *adapter,
 		}
 		/* Save orignal DUT crypto parameter
 		   before call hdd_set_genie_to_csr */
+		wlan_hdd_cfg80211_set_roam_profile(adapter, vdev);
 
 		if (hdd_sta_ctx->wpa_versions) {
 			hdd_set_genie_to_csr(adapter, &rsn_auth_type);
@@ -20762,11 +20795,9 @@ static int __wlan_hdd_cfg80211_disconnect(struct wiphy *wiphy,
 					  false, true, vdev);
 		hdd_objmgr_put_vdev(vdev);
 
-#ifdef WLAN_DEBUG
 		hdd_nofl_info("%s(vdevid-%d): Received Disconnect reason:%d %s",
 			      dev->name, adapter->vdev_id, reason,
 			      hdd_ieee80211_reason_code_to_str(reason));
-#endif
 		status = wlan_hdd_disconnect(adapter, reasonCode, reason);
 		if (0 != status) {
 			hdd_err("wlan_hdd_disconnect failed, status: %d", status);
@@ -23312,9 +23343,9 @@ static void hdd_update_chan_info(struct hdd_context *hdd_ctx,
 			struct scan_chan_info *chan,
 			struct scan_chan_info *info, uint32_t cmd_flag)
 {
-	/*if ((info->cmd_flag != WMI_CHAN_InFO_START_RESP) &&
+	if ((info->cmd_flag != WMI_CHAN_InFO_START_RESP) &&
 	   (info->cmd_flag != WMI_CHAN_InFO_END_RESP))
-		hdd_err("cmd flag is invalid: %d", info->cmd_flag);*/
+		hdd_err("cmd flag is invalid: %d", info->cmd_flag);
 
 	mutex_lock(&hdd_ctx->chan_info_lock);
 

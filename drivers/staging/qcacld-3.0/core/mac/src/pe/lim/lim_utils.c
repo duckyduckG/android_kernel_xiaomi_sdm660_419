@@ -1280,22 +1280,16 @@ lim_update_short_preamble(struct mac_context *mac_ctx, tSirMacAddr peer_mac_addr
 	}
 
 	if (i >= LIM_PROT_STA_CACHE_SIZE) {
-#ifdef WLAN_DEBUG
 		tLimNoShortParams *lim_params =
 				&psession_entry->gLimNoShortParams;
-#endif
 		if (LIM_IS_AP_ROLE(psession_entry)) {
-#ifdef WLAN_DEBUG
 			pe_err("No space in Short cache active: %d sta: %d for sta",
 				i, lim_params->numNonShortPreambleSta);
-#endif
 			lim_print_mac_addr(mac_ctx, peer_mac_addr, LOGE);
 			return;
 		} else {
-#ifdef WLAN_DEBUG
 			pe_err("No space in Short cache active: %d sta: %d for sta",
 				i, lim_params->numNonShortPreambleSta);
-#endif
 			lim_print_mac_addr(mac_ctx, peer_mac_addr, LOGE);
 			return;
 		}
@@ -1872,22 +1866,16 @@ static void __lim_process_channel_switch_timeout(struct pe_session *pe_session)
 		}
 
 		/*
-		 * If the channel-list that AP is asking us to switch is invalid
-		 * then we cannot switch the channel. Just disassociate from AP.
-		 * We will find a better AP !!!
+		 * The channel switch request received from AP is carrying
+		 * invalid channel. It's ok to ignore this channel switch
+		 * request as it might be from spoof AP. If it's from genuine
+		 * AP, it may lead to heart beat failure and result in
+		 * disconnection. DUT can go ahead and reconnect to it/any
+		 * other AP once it disconnects.
 		 */
-		if ((pe_session->limMlmState ==
-		   eLIM_MLM_LINK_ESTABLISHED_STATE) &&
-		   (pe_session->limSmeState != eLIM_SME_WT_DISASSOC_STATE) &&
-		   (pe_session->limSmeState != eLIM_SME_WT_DEAUTH_STATE)) {
-			pe_err("Invalid channel! Disconnect");
-			lim_tear_down_link_with_ap(mac,
-					   mac->lim.limTimers.
-					   gLimChannelSwitchTimer.sessionId,
-					   eSIR_MAC_UNSUPPORTED_CHANNEL_CSA,
-					   eLIM_LINK_MONITORING_DISASSOC);
-			return;
-		}
+		pe_err("Invalid channel freq %u Ignore CSA request",
+		       channel);
+		return;
 	}
 	switch (pe_session->gLimChannelSwitch.state) {
 	case eLIM_CHANNEL_SWITCH_PRIMARY_ONLY:

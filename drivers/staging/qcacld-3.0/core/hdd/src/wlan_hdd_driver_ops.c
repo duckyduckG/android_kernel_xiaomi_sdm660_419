@@ -50,11 +50,7 @@
 #define WLAN_MODULE_NAME  "wlan"
 #endif
 
-#ifdef CLD_PM_QOS
-#define DISABLE_KRAIT_IDLE_PS_VAL	1
-#else
-#define DISABLE_KRAIT_IDLE_PS_VAL	PM_QOS_DEFAULT_VALUE
-#endif
+#define DISABLE_KRAIT_IDLE_PS_VAL      1
 
 #define SSR_MAX_FAIL_CNT 3
 static uint8_t re_init_fail_cnt, probe_fail_cnt;
@@ -1036,7 +1032,7 @@ static int __wlan_hdd_bus_suspend(struct wow_enable_params wow_params)
 	void *dp_pdev;
 	struct pmo_wow_enable_params pmo_params;
 
-	hdd_debug("starting bus suspend");
+	hdd_info("starting bus suspend");
 
 	hdd_ctx = cds_get_context(QDF_MODULE_ID_HDD);
 	err = wlan_hdd_validate_context(hdd_ctx);
@@ -1099,7 +1095,7 @@ static int __wlan_hdd_bus_suspend(struct wow_enable_params wow_params)
 
 	pld_request_bus_bandwidth(hdd_ctx->parent_dev, PLD_BUS_WIDTH_NONE);
 
-	hdd_debug("bus suspend succeeded");
+	hdd_info("bus suspend succeeded");
 	return 0;
 
 resume_pmo:
@@ -1227,7 +1223,7 @@ int wlan_hdd_bus_resume(void)
 	if (cds_is_driver_recovering())
 		return 0;
 
-	hdd_debug("starting bus resume");
+	hdd_info("starting bus resume");
 
 	status = wlan_hdd_validate_context(hdd_ctx);
 	if (status) {
@@ -1277,7 +1273,7 @@ int wlan_hdd_bus_resume(void)
 		goto out;
 	}
 
-	hdd_debug("bus resume succeeded");
+	hdd_info("bus resume succeeded");
 	return 0;
 
 out:

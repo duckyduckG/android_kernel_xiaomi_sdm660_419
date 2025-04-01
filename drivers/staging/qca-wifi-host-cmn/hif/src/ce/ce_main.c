@@ -813,8 +813,8 @@ static void hif_select_service_to_pipe_map(struct hif_softc *scn,
  */
 static bool ce_mark_datapath(struct CE_state *ce_state)
 {
-	struct service_to_pipe *svc_map = NULL;
-	uint32_t map_sz = 0, map_len;
+	struct service_to_pipe *svc_map;
+	uint32_t map_sz, map_len;
 	int    i;
 	bool   rc = false;
 
@@ -3710,7 +3710,7 @@ int hif_map_service_to_pipe(struct hif_opaque_softc *hif_hdl, uint16_t svc_id,
 	unsigned int i;
 	struct service_to_pipe element;
 	struct service_to_pipe *tgt_svc_map_to_use;
-	uint32_t sz_tgt_svc_map_to_use = 0;
+	uint32_t sz_tgt_svc_map_to_use;
 	struct hif_softc *scn = HIF_GET_SOFTC(hif_hdl);
 	struct HIF_CE_state *hif_state = HIF_GET_CE_STATE(scn);
 	bool dl_updated = false;

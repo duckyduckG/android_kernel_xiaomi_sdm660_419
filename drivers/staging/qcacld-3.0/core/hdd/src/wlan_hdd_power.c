@@ -624,13 +624,13 @@ void hdd_disable_host_offloads(struct hdd_adapter *adapter,
 	hdd_enter();
 
 	if (!ucfg_pmo_is_vdev_supports_offload(adapter->vdev)) {
-		hdd_debug("offload is not supported on this vdev opmode: %d",
+		hdd_info("offload is not supported on this vdev opmode: %d",
 				adapter->device_mode);
 			goto out;
 	}
 
 	if (!ucfg_pmo_is_vdev_connected(adapter->vdev)) {
-		hdd_debug("vdev is not connected");
+		hdd_info("vdev is not connected");
 		goto out;
 	}
 
@@ -1659,7 +1659,6 @@ end:
 
 static void wlan_hdd_print_suspend_fail_stats(struct hdd_context *hdd_ctx)
 {
-#ifdef WLAN_DEBUG
 	struct suspend_resume_stats *stats = &hdd_ctx->suspend_resume_stats;
 
 	hdd_err("ipa:%d, radar:%d, roam:%d, scan:%d, initial_wakeup:%d",
@@ -1668,7 +1667,6 @@ static void wlan_hdd_print_suspend_fail_stats(struct hdd_context *hdd_ctx)
 		stats->suspend_fail[SUSPEND_FAIL_ROAM],
 		stats->suspend_fail[SUSPEND_FAIL_SCAN],
 		stats->suspend_fail[SUSPEND_FAIL_INITIAL_WAKEUP]);
-#endif
 }
 
 void wlan_hdd_inc_suspend_stats(struct hdd_context *hdd_ctx,

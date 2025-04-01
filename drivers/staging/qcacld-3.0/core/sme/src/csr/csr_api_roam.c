@@ -4067,8 +4067,8 @@ QDF_STATUS csr_roam_prepare_bss_config(struct mac_context *mac,
 	if (((pBssConfig->uCfgDot11Mode == eCSR_CFG_DOT11_MODE_11N)
 	    || (pBssConfig->uCfgDot11Mode == eCSR_CFG_DOT11_MODE_11AC))
 		&& ((pBssConfig->qosType != eCSR_MEDIUM_ACCESS_WMM_eDCF_DSCP)
-		    && (pBssConfig->qosType != eCSR_MEDIUM_ACCESS_11e_HCF)
-		    && (pBssConfig->qosType != eCSR_MEDIUM_ACCESS_11e_eDCF))) {
+		    || (pBssConfig->qosType != eCSR_MEDIUM_ACCESS_11e_HCF)
+		    || (pBssConfig->qosType != eCSR_MEDIUM_ACCESS_11e_eDCF))) {
 		/* Joining BSS is 11n capable and WMM is disabled on AP. */
 		/* Assume all HT AP's are QOS AP's and enable WMM */
 		pBssConfig->qosType = eCSR_MEDIUM_ACCESS_WMM_eDCF_DSCP;
@@ -6954,9 +6954,7 @@ static void csr_roam_process_start_bss_success(struct mac_context *mac_ctx,
 	tDot11fBeaconIEs *ies_ptr = NULL;
 	tSirMacAddr bcast_mac = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 	QDF_STATUS status;
-#ifdef FEATURE_WLAN_DIAG_SUPPORT_CSR
 	host_log_ibss_pkt_type *ibss_log;
-#endif
 #ifdef FEATURE_WLAN_MCC_TO_SCC_SWITCH
 	struct ht_profile *src_profile = NULL;
 	tCsrRoamHTProfile *dst_profile = NULL;
@@ -7058,8 +7056,8 @@ static void csr_roam_process_start_bss_success(struct mac_context *mac_ctx,
 			ibss_log->beaconInterval = (uint8_t) bi;
 		WLAN_HOST_DIAG_LOG_REPORT(ibss_log);
 	}
-	ibss_log = NULL;
 #endif
+	ibss_log = NULL;
 	/*
 	 * Only set context for non-WDS_STA. We don't even need it for
 	 * WDS_AP. But since the encryption.
@@ -7768,9 +7766,7 @@ static bool csr_roam_process_results(struct mac_context *mac_ctx, tSmeCmd *cmd,
 	struct csr_roam_profile *profile = &cmd->u.roamCmd.roamProfile;
 	eRoamCmdStatus roam_status;
 	eCsrRoamResult roam_result;
-#ifdef FEATURE_WLAN_DIAG_SUPPORT_CSR
 	host_log_ibss_pkt_type *ibss_log;
-#endif
 	struct start_bss_rsp  *start_bss_rsp = NULL;
 
 	if (!session) {
@@ -7799,8 +7795,8 @@ static bool csr_roam_process_results(struct mac_context *mac_ctx, tSmeCmd *cmd,
 			ibss_log->status = WLAN_IBSS_STATUS_FAILURE;
 			WLAN_HOST_DIAG_LOG_REPORT(ibss_log);
 		}
-		ibss_log = NULL;
 #endif
+		ibss_log = NULL;
 		start_bss_rsp = (struct start_bss_rsp *)context;
 		roam_status = eCSR_ROAM_IBSS_IND;
 		roam_result = eCSR_ROAM_RESULT_IBSS_STARTED;
@@ -8504,10 +8500,14 @@ QDF_STATUS csr_roam_connect(struct mac_context *mac, uint32_t sessionId,
 	pSession->join_bssid_count = 0;
 	pSession->discon_in_progress = false;
 	pSession->is_fils_connection = csr_is_fils_connection(pProfile);
+	/* Initialize the orig_sec_info before proceeding with the Join requests */
+	qdf_mem_copy(&pSession->orig_sec_info, &pProfile->orig_sec_info,
+				sizeof(struct self_security_info));
 	sme_debug("Persona %d authtype %d  encryType %d mc_encType %d",
 		  pProfile->csrPersona, pProfile->AuthType.authType[0],
 		  pProfile->EncryptionType.encryptionType[0],
 		  pProfile->mcEncryptionType.encryptionType[0]);
+	sme_debug("pSession[orig_sec]: key_mgmt 0x%x", pSession->orig_sec_info.key_mgmt);
 
 	csr_roam_cancel_roaming(mac, sessionId);
 	csr_scan_abort_mac_scan(mac, sessionId, INVAL_SCAN_ID);
@@ -10595,7 +10595,7 @@ void csr_roam_joined_state_msg_processor(struct mac_context *mac, void *msg_buf)
 		struct csr_roam_session *pSession;
 		tSirSmeAssocIndToUpperLayerCnf *pUpperLayerAssocCnf;
 		struct csr_roam_info *roam_info;
-		uint32_t sessionId = 0;
+		uint32_t sessionId;
 		QDF_STATUS status;
 
 		sme_debug("ASSOCIATION confirmation can be given to upper layer ");
@@ -13595,20 +13595,16 @@ static QDF_STATUS csr_roam_start_wait_for_key_timer(
 {
 	QDF_STATUS status;
 	uint8_t session_id = mac->roam.WaitForKeyTimerInfo.vdev_id;
-#ifdef WLAN_DEBUG
 	tpCsrNeighborRoamControlInfo pNeighborRoamInfo =
 		&mac->roam.neighborRoamInfo[session_id];
-#endif
 
 	if (csr_neighbor_roam_is_handoff_in_progress(mac, session_id)) {
 		/* Disable heartbeat timer when hand-off is in progress */
-#ifdef WLAN_DEBUG
 		sme_debug("disabling HB timer in state: %s sub-state: %s",
 			mac_trace_get_neighbour_roam_state(
 				pNeighborRoamInfo->neighborRoamState),
 			mac_trace_getcsr_roam_sub_state(
 				mac->roam.curSubState[session_id]));
-#endif
 		mac->mlme_cfg->timeouts.heart_beat_threshold = 0;
 	}
 	sme_debug("csrScanStartWaitForKeyTimer");
@@ -13621,7 +13617,6 @@ static QDF_STATUS csr_roam_start_wait_for_key_timer(
 QDF_STATUS csr_roam_stop_wait_for_key_timer(struct mac_context *mac)
 {
 	uint8_t vdev_id = mac->roam.WaitForKeyTimerInfo.vdev_id;
-#ifdef WLAN_DEBUG
 	tpCsrNeighborRoamControlInfo pNeighborRoamInfo =
 		&mac->roam.neighborRoamInfo[vdev_id];
 
@@ -13630,7 +13625,6 @@ QDF_STATUS csr_roam_stop_wait_for_key_timer(struct mac_context *mac)
 						   neighborRoamState),
 		mac_trace_getcsr_roam_sub_state(mac->roam.
 						curSubState[vdev_id]));
-#endif
 	if (csr_neighbor_roam_is_handoff_in_progress(mac, vdev_id)) {
 		/*
 		 * Enable heartbeat timer when hand-off is in progress
@@ -20743,6 +20737,8 @@ static void csr_update_score_params(struct mac_context *mac_ctx,
 	req_score_params->bw_weightage = weight_config->chan_width_weightage;
 	req_score_params->band_weightage = weight_config->chan_band_weightage;
 	req_score_params->nss_weightage = weight_config->nss_weightage;
+	req_score_params->security_weightage =
+					weight_config->security_weightage;
 	req_score_params->esp_qbss_weightage =
 		weight_config->channel_congestion_weightage;
 	req_score_params->beamforming_weightage =
@@ -20757,6 +20753,8 @@ static void csr_update_score_params(struct mac_context *mac_ctx,
 		bss_score_params->band_weight_per_index;
 	req_score_params->nss_index_score =
 		bss_score_params->nss_weight_per_index;
+	req_score_params->security_index_score =
+		bss_score_params->security_weight_per_index;
 
 	req_score_params->vendor_roam_score_algorithm =
 			bss_score_params->vendor_roam_score_algorithm;

@@ -1061,10 +1061,10 @@ wma_roam_scan_fill_ap_profile(struct roam_offload_scan_req *roam_req,
 	uint32_t orig_key_mgmt, authmode, uccipher, mccipher, keymgmt;
 	uint32_t group_mgmt_cipher;
 	int32_t connected_akm;
-	uint32_t num_allowed_authmode = 0;
 	uint16_t rsn_caps;
 	bool peer_rmf_capable = false;
-	int i;
+	uint32_t num_allowed_authmode = 0;
+	enum wlan_crypto_key_mgmt i;
 
 	qdf_mem_zero(profile, sizeof(*profile));
 	if (!roam_req) {
@@ -1137,6 +1137,8 @@ wma_roam_scan_fill_ap_profile(struct roam_offload_scan_req *roam_req,
 		profile->rsn_mcastmgmtcipherset = WMI_CIPHER_NONE;
 	}
 
+	/* Get keymgmt from self security info */
+	orig_key_mgmt = session->orig_sec_info.key_mgmt;
 	WMA_LOGI("%s: [crypto]rsn_caps 0x%x auth %d keymgmt 0x%x orig_key_mgmt 0x%x",
 		__func__, rsn_caps, authmode, keymgmt, orig_key_mgmt);
 

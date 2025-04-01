@@ -11,9 +11,8 @@
 extern bool enable_gesture_mode;
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 extern bool synaptics_gesture_enable_flag;
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
+#elif defined(CONFIG_MACH_XIAOMI_TULIP) || defined(CONFIG_MACH_XIAOMI_WHYRED)
 extern bool focal_gesture_mode;
-#elif defined(CONFIG_MACH_XIAOMI_WHYRED)
 extern bool synaptics_gesture_func_on;
 #endif
 #endif
@@ -271,12 +270,12 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 #ifdef CONFIG_MACH_LONGCHEER
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 			if (enable_gesture_mode || synaptics_gesture_enable_flag) {
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
+/*#elif defined(CONFIG_MACH_XIAOMI_TULIP)
 			if (enable_gesture_mode || focal_gesture_mode) {
 #elif defined(CONFIG_MACH_XIAOMI_WAYNE)
-			if (enable_gesture_mode) {
-#elif defined(CONFIG_MACH_XIAOMI_WHYRED)
-			if (enable_gesture_mode || synaptics_gesture_func_on) {
+			if (enable_gesture_mode) {*/
+#elif defined(CONFIG_MACH_XIAOMI_WHYRED) || defined(CONFIG_MACH_XIAOMI_WAYNE) || defined(CONFIG_MACH_XIAOMI_TULIP)
+			if (enable_gesture_mode || focal_gesture_mode || synaptics_gesture_func_on) {
 #endif
 				if ((strcmp(in_vreg[i].vreg_name,"lab") == 0)
 				|| (strcmp(in_vreg[i].vreg_name,"ibb") == 0)
@@ -320,12 +319,12 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 #ifdef CONFIG_MACH_LONGCHEER
 #ifdef CONFIG_MACH_XIAOMI_LAVENDER
 			if (enable_gesture_mode || synaptics_gesture_enable_flag) {
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
+/*#elif defined(CONFIG_MACH_XIAOMI_TULIP)
 			if (enable_gesture_mode || focal_gesture_mode) {
 #elif defined(CONFIG_MACH_XIAOMI_WAYNE)
-			if (enable_gesture_mode) {
-#elif defined(CONFIG_MACH_XIAOMI_WHYRED)
-			if (enable_gesture_mode || synaptics_gesture_func_on) {
+			if (enable_gesture_mode) {*/
+#elif defined(CONFIG_MACH_XIAOMI_WHYRED) || defined(CONFIG_MACH_XIAOMI_WAYNE) || defined(CONFIG_MACH_XIAOMI_TULIP)
+			if (enable_gesture_mode || focal_gesture_mode || synaptics_gesture_func_on) {
 #endif
 				if ((strcmp(in_vreg[i].vreg_name,"lab") == 0)
 				|| (strcmp(in_vreg[i].vreg_name,"ibb") == 0)

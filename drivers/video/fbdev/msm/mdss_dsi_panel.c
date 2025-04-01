@@ -21,6 +21,11 @@
 #include "mdss_dba_utils.h"
 #include "mdss_debug.h"
 
+extern int is_tulip;
+extern int is_whyred;
+extern int is_wayne;
+extern int is_lavender;
+
 #define DT_CMD_HDR 6
 #define DEFAULT_MDP_TRANSFER_TIME 14000
 
@@ -587,18 +592,19 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 
 		gpio_set_value((ctrl_pdata->rst_gpio), 0);
 keep_lcd_and_tp_reset:
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
+      if (is_tulip) {
 		pr_debug("[lcd][tp][gesture] keep lcd_reset and tp_reset gpio to high.\n");
-#elif defined(CONFIG_MACH_XIAOMI_WAYNE)
+      } else if (is_wayne) {
 		if (enable_gesture_mode)
 			pr_debug("gesture mode keep reset gpio to high.\n");
-#elif defined(CONFIG_MACH_XIAOMI_WHYRED)
+      } else if (is_whyred) {
 		if (enable_gesture_mode || synaptics_gesture_func_on)
 			pr_debug("gesture mode keep reset gpio to high.\n");
 		else
 			gpio_set_value((ctrl_pdata->rst_gpio), 0);
-#else
+      } else {
 		gpio_set_value((ctrl_pdata->rst_gpio), 0);
+	}
 #endif
 		gpio_free(ctrl_pdata->rst_gpio);
 		if (gpio_is_valid(ctrl_pdata->lcd_mode_sel_gpio)) {

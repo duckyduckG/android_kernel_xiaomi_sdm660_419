@@ -21,10 +21,10 @@
 #include "nt36xxx.h"
 
 
-int is_tulip = 0;
-int is_whyred = 0;
-int is_wayne = 0;
-int is_lavender = 0;
+int is_tulip;
+int is_whyred;
+int is_wayne;
+int is_lavender;
 
 int nvt_rst_pin = -1;  // SHT VALUE //
 int nvt_int_pin = -1; // SHT VALUE //

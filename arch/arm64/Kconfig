@@ -146,7 +146,6 @@ config ARM64
 	select HAVE_KERNEL_LZ4
 	select HAVE_MEMBLOCK
 	select HAVE_MEMBLOCK_NODE_MAP if NUMA
-	select HAVE_MOVE_PMD
 	select HAVE_NMI
 	select HAVE_PATA_PLATFORM
 	select HAVE_PERF_EVENTS
@@ -180,6 +179,8 @@ config ARM64
 	select SWIOTLB
 	select SYSCTL_EXCEPTION_TRACE
 	select THREAD_INFO_IN_TASK
+	select HAVE_MOVE_PMD
+	select HAVE_MOVE_PUD
 	help
 	  ARM 64-bit (AArch64) Linux support.
 

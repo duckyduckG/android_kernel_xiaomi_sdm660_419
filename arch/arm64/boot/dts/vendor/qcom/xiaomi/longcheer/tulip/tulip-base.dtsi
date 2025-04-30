@@ -28,6 +28,10 @@
 	qcom,fg-auto-recharge-soc;
 };
 
+&pm660_rradc {
+	qcom,rradc-fg-reset-wa;
+};
+
 &pm660_haptics {
 	qcom,actuator-type = "erm";
 	qcom,lra-resonance-sig-shape = "square";

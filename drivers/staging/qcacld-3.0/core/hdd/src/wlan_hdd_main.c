@@ -14830,10 +14830,7 @@ event_deinit:
 	qdf_mem_exit();
 	qdf_lock_stats_deinit();
 	qdf_debugfs_exit();
-print_deinit:
-	hdd_qdf_print_deinit();
 
-exit:
 	return status;
 }
 

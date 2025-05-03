@@ -754,6 +754,11 @@ CONFIG_DEBUG_LIST=y
 # CONFIG_CORESIGHT_REMOTE_ETM is not set
 # CONFIG_CORESIGHT_TGU is not set
 
+#
+# Clock Source drivers
+#
+CONFIG_ARM_ARCH_TIMER_VCT_ACCESS=y
+
 #Unicode
 CONFIG_UNICODE=y
 
